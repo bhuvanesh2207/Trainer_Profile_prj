@@ -1,0 +1,7 @@
+RewriteEngine On
+RewriteBase /trainer_profile/
+RewriteCond %{REQUEST_URI} !^/trainer_profile/assets/
+RewriteCond %{REQUEST_URI} !^/trainer_profile/api/
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ public/index.php [QSA,L]

@@ -1,0 +1,123 @@
+<?php
+ini_set('display_errors', 1);
+error_reporting(E_ALL);
+
+session_start();
+require '../api/db.php';
+
+/* If already logged in, go to dashboard */
+if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true) {
+            header("Location: /trainer_profile/admin/dashboard");
+            exit;
+}
+
+$error = "";
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
+    $username = trim($_POST['username'] ?? '');
+    $password = trim($_POST['password'] ?? '');
+
+    if ($username === '' || $password === '') {
+        $error = "All fields are required";
+    } else {
+
+        $stmt = $pdo->prepare("SELECT * FROM admins WHERE username = ? LIMIT 1");
+        $stmt->execute([$username]);
+        $admin = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if ($admin && password_verify($password, $admin['password'])) {
+
+            session_regenerate_id(true);
+            $_SESSION['is_admin'] = true;
+            $_SESSION['admin_username'] = $admin['username'];
+
+            header("Location: /trainer_profile/admin/dashboard");
+            exit;
+        } else {
+            $error = "Invalid username or password";
+        }
+    }
+}
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login - Trainer Profile</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        resume: { primary: '#5D1F2F' }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
+    
+    <div class="bg-white p-8 rounded-xl shadow-lg w-full max-w-md">
+        <div class="flex flex-col items-center mb-6">
+           <div class="w-12 h-12 bg-resume-primary rounded-full flex items-center justify-center text-white mb-4">
+            <span class="material-icons text-white">lock</span>
+        </div>
+
+            <h1 class="text-2xl font-bold text-gray-800">Admin Login</h1>
+            <p class="text-gray-500 text-sm">Enter your credentials to access the dashboard</p>
+        </div>
+
+        <!-- Display PHP error if any -->
+        <?php if($error): ?>
+            <div class="mb-4 p-3 bg-red-50 text-red-600 text-sm rounded-md border border-red-100">
+                <?= htmlspecialchars($error) ?>
+            </div>
+        <?php endif; ?>
+
+        <form method="POST" class="space-y-4">
+            
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Username</label>
+                <input type="text" name="username" id="username" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-resume-primary outline-none" required>
+            </div>
+    
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                <input type="password" name="password" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-resume-primary outline-none" required>
+            </div>
+
+            <button type="submit" class="w-full py-2 bg-resume-primary text-white rounded-md font-medium hover:bg-opacity-90 transition-colors">
+                Sign In
+            </button>
+        </form>
+        <div class="text-center mt-4">
+            <a href="../form" class="text-gray-500 hover:text-[#5D1F2F] text-sm font-medium no-underline">
+                Back to Form
+            </a>
+        </div>
+    </div>
+
+    <!-- Lucide icons replacement -->
+   <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        lucide.replace();
+    });
+
+    document.addEventListener("DOMContentLoaded", function() {
+    // Focus the username input automatically
+    const usernameInput = document.getElementById('username');
+    if (usernameInput) {
+      usernameInput.focus();
+    }
+  });
+
+</script>
+
+
+</body>
+</html>
