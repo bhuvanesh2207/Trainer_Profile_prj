@@ -20,6 +20,7 @@ require '../api/db.php';
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Roboto:wght@300;400;500;700&family=Merriweather:wght@300;400;700&family=Open+Sans:wght@400;600&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
     <script>
         tailwind.config = {
             theme: {
@@ -31,16 +32,21 @@ require '../api/db.php';
                             blue: '#1e40af',
                             slate: '#334155'
                         }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Merriweather', 'serif'],
+                        mono: ['Roboto', 'sans-serif'],
                     }
                 }
             }
         };
     </script>
     <style>
-        /* A4 Paper for Preview */
+        /* A4 Paper for Preview (screen) */
         .a4-paper {
-            width: 210mm;
-            min-height: 297mm;
+            width: 794px;           /* ~210mm at 96dpi */
+            min-height: 1123px;     /* ~297mm */
             background: white;
             margin: 0 auto;
             overflow: hidden;
@@ -66,7 +72,7 @@ require '../api/db.php';
             background: #94a3b8;
         }
 
-        /* Print Styles */
+        /* PRINT STYLES (from your first snippet, adapted) */
         @media print {
             @page {
                 size: A4;
@@ -79,7 +85,8 @@ require '../api/db.php';
                 padding: 0;
             }
 
-            body>*:not(#preview-modal) {
+            /* Hide everything except the preview modal */
+            body > *:not(#preview-modal) {
                 display: none !important;
             }
 
@@ -95,6 +102,7 @@ require '../api/db.php';
                 overflow: visible !important;
             }
 
+            /* Hide modal header/footer in print */
             #preview-modal-header,
             #preview-modal-footer {
                 display: none !important;
@@ -107,15 +115,37 @@ require '../api/db.php';
                 background: white !important;
             }
 
+            /* Make the resume full A4, remove scaling and shadow */
             .a4-paper {
                 box-shadow: none !important;
                 margin: 0 !important;
                 width: 210mm !important;
                 height: 297mm !important;
-                transform: scale(1) !important;
+                min-height: 297mm !important;
+                transform: none !important;
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
             }
+            
+            /* Set the PDF filename */
+            @page {
+                prince-pdf-title: attr(data-pdf-filename);
+            }
+            
+            body::after {
+                content: attr(data-pdf-filename);
+                display: none;
+            }
+        }
+        
+        /* Loading animation */
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .animate-spin {
+            animation: spin 1s linear infinite;
         }
     </style>
 </head>
@@ -184,19 +214,14 @@ require '../api/db.php';
                 <div id="resume-preview-container" class="a4-paper transform transition-transform origin-top scale-[0.55] sm:scale-75 md:scale-90 lg:scale-100"></div>
             </div>
             <div id="preview-modal-footer" class="px-6 py-4 border-t bg-white flex flex-wrap justify-end gap-3">
-                <button onclick="window.print()" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 flex items-center gap-2 text-sm">
-                    <i data-lucide="printer" class="w-4 h-4"></i> Print
-                </button>
-                <button onclick="downloadPDF()" class="px-4 py-2 bg-resume-primary text-white rounded-md hover:bg-opacity-90 flex items-center gap-2 text-sm">
-                    <i data-lucide="download" class="w-4 h-4"></i> Download PDF
+                <!-- Print button -->
+                <button id="admin-print-btn" type="button" class="w-full sm:w-auto px-6 py-2 rounded-md bg-resume-primary text-white font-medium hover:bg-opacity-90 shadow-md flex items-center justify-center gap-2 transition-all">
+                    <span class="material-icons text-base">print</span>
+                    Print / Save as PDF
                 </button>
             </div>
         </div>
     </div>
-
-    <!-- PDF Libraries -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
     <script>
         // ============================
@@ -327,18 +352,23 @@ require '../api/db.php';
                 }
 
                 return `
-                    <ul class="list-disc ml-4 space-y-1 text-xs text-gray-700">
+                    <div class="space-y-1 text-xs text-gray-700">
                         ${achievements.map(a => {
                             const text = typeof a === 'string' ? a : (a.text || '');
-                            return `<li>${this.nl2br(text)}</li>`;
+                            return `
+                                <div class="flex items-start gap-1">
+                                    <span class="mt-[3px] w-1.5 h-1.5 rounded-full bg-gray-700 flex-shrink-0"></span>
+                                    <span>${this.nl2br(text)}</span>
+                                </div>
+                            `;
                         }).join("")}
-                    </ul>
+                    </div>
                 `;
             },
 
             generateLayout1: function (trainer, fontClass, photoShape, photoUrl) {
                 const fullName = `${trainer.first_name || ''} ${trainer.last_name || ''}`.trim();
-                const initials = ((trainer.first_name || '')[0] || '') + ((trainer.last_name || '')[0] || '');
+                const initials = (trainer.first_name || '').charAt(0) + (trainer.last_name || '').charAt(0);
 
                 return `
                     <div class="w-full h-full flex flex-col ${fontClass}">
@@ -404,7 +434,7 @@ require '../api/db.php';
 
             generateLayout2: function (trainer, fontClass, photoShape, photoUrl) {
                 const fullName = `${trainer.first_name || ''} ${trainer.last_name || ''}`.trim();
-                const initials = ((trainer.first_name || '')[0] || '') + ((trainer.last_name || '')[0] || '');
+                const initials = (trainer.first_name || '').charAt(0) + (trainer.last_name || '').charAt(0);
 
                 return `
                     <div class="w-full h-full flex ${fontClass}">
@@ -468,7 +498,7 @@ require '../api/db.php';
 
             generateLayout3: function (trainer, fontClass, photoShape, photoUrl) {
                 const fullName = `${trainer.first_name || ''} ${trainer.last_name || ''}`.trim();
-                const initials = ((trainer.first_name || '')[0] || '') + ((trainer.last_name || '')[0] || '');
+                const initials = (trainer.first_name || '').charAt(0) + (trainer.last_name || '').charAt(0);
 
                 const shapeClass = photoShape === 'circle' ? 'rounded-full' : 'rounded-md';
                 const photoBlock = (photoUrl && photoUrl !== 'null' && photoUrl !== '') ?
@@ -538,7 +568,9 @@ require '../api/db.php';
             }
         };
 
-        let currentTrainer = null;
+        // Global current trainer
+        window.currentTrainer = null;
+        window.currentFileName = 'trainer_profile';
 
         function closePreview() {
             $('#preview-modal').addClass('hidden');
@@ -573,7 +605,17 @@ require '../api/db.php';
                         return;
                     }
 
-                    currentTrainer = trainer;
+                    window.currentTrainer = trainer;
+                    
+                    // Generate filename from first name
+                    const firstName = trainer.first_name || '';
+                    if (firstName) {
+                        // Clean filename: remove special characters, keep only letters, numbers, underscores, hyphens
+                        const cleanName = firstName.replace(/[^a-zA-Z0-9_\-]/g, '_').toLowerCase();
+                        window.currentFileName = cleanName + '_profile';
+                    } else {
+                        window.currentFileName = 'trainer_profile';
+                    }
 
                     const savedTemplate = trainer.template || '1';
                     const savedFont = trainer.font || 'font-sans';
@@ -611,166 +653,159 @@ require '../api/db.php';
             if (window.lucide) lucide.createIcons();
         }
 
-        // ============================
-        // Download PDF
-        // ============================
-        async function downloadPDF() {
-            try {
-                if (!window.html2canvas || !window.jspdf) {
-                    alert("PDF libraries not loaded. Please refresh the page.");
+        // PRINT HANDLER with filename support
+        document.addEventListener('DOMContentLoaded', function () {
+            const printBtn = document.getElementById('admin-print-btn');
+            if (!printBtn) return;
+
+            printBtn.addEventListener('click', function () {
+                if (!window.currentTrainer) {
+                    alert('No trainer profile loaded.');
                     return;
                 }
-
-                if (!currentTrainer) {
-                    alert('No trainer data available. Please select a trainer first.');
-                    return;
-                }
-
-                const { jsPDF } = window.jspdf;
-
-                const savedTemplate = currentTrainer.template || '1';
-                const savedFont = currentTrainer.font || 'font-sans';
-                const savedPhotoShape = currentTrainer.photo_shape || 'circle';
-                const photoUrl = currentTrainer.photo ? '/trainer_profile/uploads/' + currentTrainer.photo : null;
-
-                let html = '';
-
-                switch (savedTemplate) {
-                    case '2':
-                        html = resumeLayouts.generateLayout2(currentTrainer, savedFont, savedPhotoShape, photoUrl);
-                        break;
-                    case '3':
-                        html = resumeLayouts.generateLayout3(currentTrainer, savedFont, savedPhotoShape, photoUrl);
-                        break;
-                    case '1':
-                    default:
-                        html = resumeLayouts.generateLayout1(currentTrainer, savedFont, savedPhotoShape, photoUrl);
-                        break;
-                }
-
-                if (!html || html.length < 100) {
-                    alert('Resume content is empty or incomplete. Please try again.');
-                    return;
-                }
-
-                // Create an off-screen print container
-                const printContainer = document.createElement('div');
-                printContainer.style.cssText = `
-                    position: fixed;
-                    top: -10000px;
-                    left: -10000px;
-                    width: auto;
-                    height: auto;
-                    background: white;
-                    z-index: -1;
-                    overflow: visible;
-                    display: block;
-                    opacity: 1;
-                    pointer-events: none;
-                    user-select: none;
-                    visibility: visible;
-                `;
-
-                const printPaper = document.createElement('div');
-                printPaper.className = 'a4-paper';
-                printPaper.style.cssText = `
-                    width: 210mm;
-                    height: 297mm;
-                    min-height: 297mm;
-                    box-shadow: none;
-                    margin: 0;
-                    transform: none;
-                    -webkit-print-color-adjust: exact;
-                    print-color-adjust: exact;
-                    background: white;
-                `;
-
-                printPaper.innerHTML = html;
-                printContainer.appendChild(printPaper);
-                document.body.appendChild(printContainer);
-
-                if (window.lucide) {
-                    lucide.createIcons();
-                }
-
-                // Wait for images to load
-                const images = printPaper.querySelectorAll('img');
-                await Promise.all(
-                    Array.from(images).map((img) =>
-                        new Promise((resolve) => {
-                            if (img.complete && img.naturalHeight !== 0) {
-                                resolve();
-                            } else {
-                                img.onload = () => resolve();
-                                img.onerror = () => resolve();
+                
+                // Store original button content
+                const originalHTML = printBtn.innerHTML;
+                printBtn.innerHTML = '<span class="material-icons text-base animate-spin">sync</span> Preparing...';
+                printBtn.disabled = true;
+                
+                // Small delay to ensure UI updates
+                setTimeout(() => {
+                    try {
+                        // Set document title to desired filename
+                        const originalTitle = document.title;
+                        document.title = window.currentFileName;
+                        
+                        // Add a data attribute to body for print filename
+                        document.body.setAttribute('data-pdf-filename', window.currentFileName);
+                        
+                        // Add print-specific CSS for filename
+                        const printStyle = document.createElement('style');
+                        printStyle.id = 'print-filename-style';
+                        printStyle.textContent = `
+                            @media print {
+                                @page {
+                                    prince-pdf-title: "${window.currentFileName}";
+                                }
+                                body::after {
+                                    content: "${window.currentFileName}";
+                                    display: none;
+                                }
                             }
-                        })
-                    )
-                );
-
-                await new Promise((r) => setTimeout(r, 50));
-
-                const canvas = await html2canvas(printPaper, {
-                    scale: 2,
-                    useCORS: true,
-                    allowTaint: true,
-                    backgroundColor: '#ffffff',
-                    logging: false
-                });
-
-                document.body.removeChild(printContainer);
-
-                if (canvas.width === 0 || canvas.height === 0) {
-                    console.error('Canvas dimensions:', canvas.width, canvas.height);
-                    alert('Failed to capture resume content. Canvas is empty.');
-                    return;
-                }
-
-                const imgData = canvas.toDataURL('image/png', 1.0);
-                if (!imgData || imgData === 'data:,' || imgData.length < 1000) {
-                    console.error('Image data length:', imgData ? imgData.length : 0);
-                    alert('Failed to generate image data.');
-                    return;
-                }
-
-                const pdf = new jsPDF('p', 'mm', 'a4');
-                const pdfWidth = pdf.internal.pageSize.getWidth();
-                const pdfHeight = pdf.internal.pageSize.getHeight();
-
-                const canvasAspectRatio = canvas.width / canvas.height;
-                const pdfAspectRatio = pdfWidth / pdfHeight;
-
-                let renderWidth, renderHeight, offsetX = 0, offsetY = 0;
-
-                if (canvasAspectRatio > pdfAspectRatio) {
-                    renderWidth = pdfWidth;
-                    renderHeight = pdfWidth / canvasAspectRatio;
-                    offsetY = (pdfHeight - renderHeight) / 2;
-                } else {
-                    renderHeight = pdfHeight;
-                    renderWidth = pdfHeight * canvasAspectRatio;
-                    offsetX = (pdfWidth - renderWidth) / 2;
-                }
-
-                pdf.addImage(imgData, 'PNG', offsetX, offsetY, renderWidth, renderHeight);
-
-                const trainerName = `${currentTrainer.first_name || ''}_${currentTrainer.last_name || ''}`
-                    .trim()
-                    .replace(/\s+/g, '_') || 'trainer_profile';
-
-                pdf.save(`${trainerName}_profile.pdf`);
-                alert('PDF downloaded successfully!');
-
-            } catch (error) {
-                console.error('Download PDF error:', error);
-                alert('An unexpected error occurred. Please try again.');
+                        `;
+                        document.head.appendChild(printStyle);
+                        
+                        // Trigger print
+                        window.print();
+                        
+                        // Clean up after printing
+                        setTimeout(() => {
+                            document.title = originalTitle;
+                            document.body.removeAttribute('data-pdf-filename');
+                            const styleEl = document.getElementById('print-filename-style');
+                            if (styleEl) {
+                                styleEl.remove();
+                            }
+                        }, 100);
+                        
+                    } catch (err) {
+                        console.error('Print error:', err);
+                        alert('Failed to open print dialog. Please use Ctrl+P or Cmd+P instead.');
+                    } finally {
+                        // Restore button
+                        printBtn.innerHTML = originalHTML;
+                        printBtn.disabled = false;
+                    }
+                }, 100);
+            });
+        });
+        
+        // Alternative print method using iframe for better filename control
+        function printWithCustomFilename() {
+            if (!window.currentTrainer) {
+                alert('No trainer profile loaded.');
+                return;
             }
+            
+            const printBtn = document.getElementById('admin-print-btn');
+            const originalHTML = printBtn.innerHTML;
+            printBtn.innerHTML = '<span class="material-icons text-base animate-spin">sync</span> Preparing...';
+            printBtn.disabled = true;
+            
+            setTimeout(() => {
+                try {
+                    const resumeContent = document.getElementById('resume-preview-container').innerHTML;
+                    const iframe = document.createElement('iframe');
+                    iframe.style.position = 'absolute';
+                    iframe.style.width = '0';
+                    iframe.style.height = '0';
+                    iframe.style.border = 'none';
+                    document.body.appendChild(iframe);
+                    
+                    const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                    iframeDoc.open();
+                    iframeDoc.write(`
+                        <!DOCTYPE html>
+                        <html>
+                        <head>
+                            <title>${window.currentFileName}</title>
+                            <style>
+                                @page {
+                                    size: A4;
+                                    margin: 0;
+                                }
+                                body {
+                                    margin: 0;
+                                    padding: 0;
+                                }
+                                .a4-paper {
+                                    width: 210mm;
+                                    height: 297mm;
+                                    background: white;
+                                    margin: 0;
+                                    overflow: hidden;
+                                    -webkit-print-color-adjust: exact;
+                                    print-color-adjust: exact;
+                                }
+                                ${document.querySelector('style').textContent}
+                            </style>
+                        </head>
+                        <body> 
+                            <div class="a4-paper">
+                                ${resumeContent}
+                            </div>
+                            <script>
+                                window.onload = function() {
+                                    window.print();
+                                    setTimeout(function() {
+                                        window.parent.postMessage('printComplete', '*');
+                                    }, 100);
+                                };
+                            <\/script>
+                        </body>
+                        </html>
+                    `);
+                    iframeDoc.close();
+                    // Listen for print completion
+                    window.addEventListener('message', function handler(event) {
+                        if (event.data === 'printComplete') {
+                            document.body.removeChild(iframe);
+                            window.removeEventListener('message', handler);
+                        }
+                    });
+                    
+                } catch (err) {
+                    console.error('Print error:', err);
+                    alert('Failed to generate print preview.');
+                } finally {
+                    printBtn.innerHTML = originalHTML;
+                    printBtn.disabled = false;
+                }
+            }, 100);
         }
     </script>
-
     <script>
         if (window.lucide) lucide.createIcons();
     </script>
 </body>
-
 </html>

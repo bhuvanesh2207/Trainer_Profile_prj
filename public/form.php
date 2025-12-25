@@ -14,10 +14,6 @@
     <!-- Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
 
-    <!-- PDF Libraries -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-
     <script>
         tailwind.config = {
             theme: {
@@ -50,12 +46,78 @@
         /* A4 Paper Size for Preview */
         .a4-paper {
             width: 210mm;
-            min-height: 297mm;
+            height: 297mm;
             background: white;
             margin: 0 auto;
             overflow: hidden;
             box-shadow: 0 10px 30px rgba(0,0,0,0.15);
             position: relative;
+        }
+
+        /* Print Styles */
+         @media print {
+            @page {
+                size: A4;
+                margin: 0;
+            }
+
+            body {
+                background: white;
+                margin: 0;
+                padding: 0;
+            }
+
+            /* Hide everything except the preview modal */
+            body > *:not(#preview-modal) {
+                display: none !important;
+            }
+
+            #preview-modal {
+                position: absolute !important;
+                top: 0 !important;
+                left: 0 !important;
+                width: 100% !important;
+                height: auto !important;
+                background: white !important;
+                z-index: 9999 !important;
+                display: block !important;
+                overflow: visible !important;
+            }
+
+            /* Hide modal header/footer in print */
+            #preview-modal-header,
+            #preview-modal-footer {
+                display: none !important;
+            }
+
+            #preview-scroll-container {
+                overflow: visible !important;
+                height: auto !important;
+                padding: 0 !important;
+                background: white !important;
+            }
+
+            /* Make the resume full A4, remove scaling and shadow */
+            .a4-paper {
+                box-shadow: none !important;
+                margin: 0 !important;
+                width: 210mm !important;
+                height: 297mm !important;
+                min-height: 297mm !important;
+                transform: none !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            
+            /* Set the PDF filename */
+            @page {
+                prince-pdf-title: attr(data-pdf-filename);
+            }
+            
+            body::after {
+                content: attr(data-pdf-filename);
+                display: none;
+            }
         }
 
         /* Validation Styles */
@@ -87,50 +149,6 @@
 
         .fade-in {
             animation: fadeIn 0.3s ease-out;
-        }
-
-        /* Print Styles - CRITICAL */
-        @media print {
-            @page { size: A4; margin: 0; }
-            body { background: white; margin: 0; padding: 0; }
-            
-            /* Hide everything except the resume preview container */
-            body > *:not(#preview-modal) { display: none !important; }
-            
-            /* Ensure modal is visible and reset styles */
-            #preview-modal {
-                position: absolute !important;
-                top: 0 !important;
-                left: 0 !important;
-                width: 100% !important;
-                height: auto !important;
-                background: white !important;
-                z-index: 9999 !important;
-                display: block !important;
-                overflow: visible !important;
-            }
-
-            /* Hide modal controls (header/footer) */
-            #preview-modal-header, #preview-modal-footer { display: none !important; }
-            
-            /* Reset the scroll container */
-            #preview-scroll-container {
-                overflow: visible !important;
-                height: auto !important;
-                padding: 0 !important;
-                background: white !important;
-            }
-
-            /* Ensure the A4 paper fits perfectly */
-            .a4-paper {
-                box-shadow: none !important;
-                margin: 0 !important;
-                width: 210mm !important;
-                height: 297mm !important;
-                transform: scale(1) !important;
-                -webkit-print-color-adjust: exact !important;
-                print-color-adjust: exact !important;
-            }
         }
     </style>
 </head>
@@ -342,7 +360,7 @@
                         <input
                             type="file"
                             id="photo-upload"
-                            accept="image/*"
+                            accept="image/jpeg,image/png,image/gif,image/webp"
                             class="block w-full text-sm text-gray-500
                                     file:mr-3 file:py-1.5 file:px-3
                                     file:rounded-md file:border-0
@@ -350,8 +368,8 @@
                                     file:bg-resume-primary file:text-white
                                     hover:file:bg-opacity-90 cursor-pointer"
                             required
-                            data-validation="required"
                         />
+                        <div class="validation-message"></div>
                     </div>
                 </div>
 
@@ -482,23 +500,21 @@
         <!-- Modal Content (Scrollable) -->
         <div id="preview-scroll-container" class="flex-1 overflow-auto bg-gray-200 p-2 sm:p-4 md:p-8 flex justify-center">
             <!-- THE RESUME CONTAINER (A4) -->
-            <div id="resume-preview-container" class="a4-paper transform transition-transform origin-top scale-[0.55] sm:scale-75 md:scale-90 lg:scale-100">
+            <div id="resume-preview-container" class="a4-paper">
                 <!-- Content injected by JS -->
             </div>
-        </div>
+        </div> 
 
         <!-- Modal Footer -->
         <div id="preview-modal-footer" class="px-4 md:px-6 py-3 md:py-4 border-t bg-white flex flex-wrap justify-end gap-2 md:gap-3">
-            <button onclick="window.print()" class="px-4 md:px-6 py-2 rounded-md bg-resume-primary text-white text-sm md:text-base font-medium hover:bg-opacity-90 shadow-md flex items-center gap-2 transition-all">
-                <i data-lucide="printer" class="w-4 h-4"></i> Print
+            <button id="print-btn" type="button" class="w-full sm:w-auto px-6 py-2 rounded-md bg-resume-primary text-white font-medium hover:bg-opacity-90 shadow-md flex items-center justify-center gap-2 transition-all">
+                <i data-lucide="printer" class="w-4 h-4"></i> Print/Download
             </button>
-            <button onclick="downloadPDF()" class="px-4 md:px-6 py-2 rounded-md bg-resume-primary text-white text-sm md:text-base font-medium hover:bg-opacity-90 shadow-md flex items-center gap-2 transition-all">
-                <i data-lucide="download" class="w-4 h-4"></i> Download PDF
-            </button>
+
             <button onclick="submitProfile()" class="px-4 md:px-6 py-2 rounded-md bg-resume-primary text-white text-sm md:text-base font-medium hover:bg-opacity-90 shadow-md flex items-center gap-2 transition-all">
                 <i data-lucide="check" class="w-4 h-4"></i> Submit Profile
             </button>
-        </div>  
+        </div>
     </div>
 </div>
 
@@ -523,7 +539,23 @@ const Validator = {
         minLength: (value, min) => String(value || '').length >= Number(min),
         maxLength: (value, max) => String(value || '').length <= Number(max),
         fileSize: (file, maxKB) => !file || file.size <= maxKB * 1024,
-        fileType: (file, type) => !file || file.type.startsWith(type)
+        fileType: (file, types) => {
+            if (!file) return true;
+            const allowedTypes = types.split(',');
+            return allowedTypes.some(type => file.type === type || file.type.startsWith(type));
+        },
+        dateGreaterThan: (value, otherFieldId) => {
+            if (!value) return true;
+            const otherInput = document.getElementById(otherFieldId);
+            if (!otherInput || !otherInput.value) return true;
+            return new Date(value) > new Date(otherInput.value);
+        },
+        yearGreaterThan: (value, otherFieldId) => {
+            if (!value) return true;
+            const otherInput = document.getElementById(otherFieldId);
+            if (!otherInput || !otherInput.value) return true;
+            return parseInt(value) > parseInt(otherInput.value);
+        }
     },
 
     messages: {
@@ -533,7 +565,9 @@ const Validator = {
         minLength: 'Minimum {min} characters required',
         maxLength: 'Maximum {max} characters allowed',
         fileSize: 'File size must be less than {maxKB}KB',
-        fileType: 'Invalid file type. Expected {type}'
+        fileType: 'Invalid file type. Only image files (JPG, PNG, GIF) are allowed',
+        dateGreaterThan: 'End date must be after start date',
+        yearGreaterThan: 'End year must be after start year'
     },
 
     validate(input) {
@@ -659,6 +693,169 @@ function showAlert(message, type = 'info', duration = 5000) {
     }
 }
 
+// Function to get trainer's first name
+function getTrainerFirstName() {
+    const firstNameInput = document.getElementById('firstName');
+    if (firstNameInput && firstNameInput.value.trim()) {
+        // Clean the filename: remove special characters and spaces
+        const firstName = firstNameInput.value.trim();
+        return firstName.replace(/[^a-zA-Z0-9_\-]/g, '_').toLowerCase();
+    }
+    return 'trainer_profile';
+}
+
+// Print functionality with custom filename
+function setupPrintFunctionality() {
+    const printBtn = document.getElementById('print-btn');
+    if (!printBtn) return;
+
+    printBtn.addEventListener('click', function() {
+        const originalHTML = printBtn.innerHTML;
+        printBtn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Preparing...';
+        printBtn.disabled = true;
+        
+        if (window.lucide) lucide.createIcons();
+
+        // Small delay to ensure UI updates
+        setTimeout(() => {
+            try {
+                // Ensure all icons are rendered
+                if (window.lucide) {
+                    lucide.createIcons();
+                }
+                
+                // Get trainer's first name for filename
+                const firstName = getTrainerFirstName();
+                
+                // Create a custom print event to set filename
+                const beforePrint = () => {
+                    // Add custom CSS for print filename
+                    const style = document.createElement('style');
+                    style.id = 'print-filename-style';
+                    style.textContent = `
+                        @media print {
+                            @page {
+                                prince-pdf-title: "${firstName}_Profile";
+                            }
+                        }
+                    `;
+                    document.head.appendChild(style);
+                };
+                
+                const afterPrint = () => {
+                    // Clean up
+                    const styleEl = document.getElementById('print-filename-style');
+                    if (styleEl) {
+                        styleEl.remove();
+                    }
+                };
+                
+                // Add event listeners for print
+                window.addEventListener('beforeprint', beforePrint);
+                window.addEventListener('afterprint', afterPrint);
+                
+                // For browsers that support the title attribute in print dialog
+                // We'll use a small hack to set the document title temporarily
+                const originalTitle = document.title;
+                document.title = `${firstName.charAt(0).toUpperCase() + firstName.slice(1)}_Profile`;
+                
+                // Trigger the browser's print dialog
+                window.print();
+                
+                // Restore original title
+                document.title = originalTitle;
+                
+                // Remove event listeners
+                window.removeEventListener('beforeprint', beforePrint);
+                window.removeEventListener('afterprint', afterPrint);
+                
+               
+                
+            } catch (err) {
+                console.error('Print error:', err);
+                showAlert('Failed to open print dialog. Please use Ctrl+P or Cmd+P instead.', 'error', 5000);
+            } finally {
+                printBtn.innerHTML = originalHTML;
+                printBtn.disabled = false;
+                if (window.lucide) lucide.createIcons();
+            }
+        }, 100);
+    });
+}
+
+// Alternative approach: Using iframe for better filename control
+function printWithFilename() {
+    const firstName = getTrainerFirstName();
+    const resumeContainer = document.getElementById('resume-preview-container');
+    
+    if (!resumeContainer) {
+        showAlert('No resume content found.', 'error', 3000);
+        return;
+    }
+    
+    // Create a temporary iframe
+    const iframe = document.createElement('iframe');
+    iframe.style.position = 'absolute';
+    iframe.style.width = '0';
+    iframe.style.height = '0';
+    iframe.style.border = 'none';
+    document.body.appendChild(iframe);
+    
+    // Write the resume content to iframe
+    const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+    iframeDoc.open();
+    iframeDoc.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>${firstName}_profile</title>
+            <style>
+                @page {
+                    size: A4;
+                    margin: 0;
+                }
+                body {
+                    margin: 0;
+                    padding: 0;
+                }
+                .a4-paper {
+                    width: 210mm;
+                    height: 297mm;
+                    background: white;
+                    margin: 0;
+                    overflow: hidden;
+                    -webkit-print-color-adjust: exact;
+                    print-color-adjust: exact;
+                }
+                ${document.querySelector('style').textContent}
+            </style>
+        </head>
+        <body>
+            <div class="a4-paper">
+                ${resumeContainer.innerHTML}
+            </div>
+            <script>
+                window.onload = function() {
+                    window.print();
+                    setTimeout(function() {
+                        window.parent.postMessage('printComplete', '*');
+                    }, 100);
+                };
+            <\/script>
+        </body>
+        </html>
+    `);
+    iframeDoc.close();
+    
+    // Listen for print completion
+    window.addEventListener('message', function handler(event) {
+        if (event.data === 'printComplete') {
+            document.body.removeChild(iframe);
+            window.removeEventListener('message', handler);
+        }
+    });
+}
+
 // Live validation setup for static fields
 function setupLiveValidation() {
     const inputs = document.querySelectorAll('[data-validation]');
@@ -713,6 +910,7 @@ function setupLiveValidation() {
 // Initialize validation when DOM is ready
 document.addEventListener('DOMContentLoaded', function() {
     setupLiveValidation();
+    setupPrintFunctionality();
     
     // Show welcome message
     setTimeout(() => {
@@ -721,8 +919,8 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-<script src="assets/js/resume_layouts.js"></script>
-<script src="assets/js/app.js"></script>
+<script src="/trainer_profile/assets/js/resume_layouts.js"></script>
+<script src="/trainer_profile/assets/js/app.js"></script>
 
 <!-- Initial icon render -->
 <script>
@@ -730,5 +928,6 @@ document.addEventListener('DOMContentLoaded', function() {
         lucide.createIcons();
     }
 </script>
+
 </body>
 </html>

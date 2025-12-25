@@ -108,19 +108,25 @@ function renderLanguages(languages) {
     `;
 }
 
-function renderAchievements(achievements) {
-    if (!achievements || !achievements.length) {
+ function renderAchievements(achievements) {
+    if (!achievements || !achievements.length || (Array.isArray(achievements) && achievements.length === 0)) {
         return `<p class="text-xs text-gray-500">No achievements added.</p>`;
     }
+
     return `
-        <ul class="list-disc ml-4 space-y-1 text-xs text-gray-700">
-            ${achievements
-                .map((a) => `<li>${nl2br(a)}</li>`)
-                .join("")}
-        </ul>
+        <div class="space-y-1 text-xs text-gray-700">
+            ${achievements.map(a => {
+                const text = typeof a === 'string' ? a : (a.text || '');
+                return `
+                    <div class="flex items-start gap-1">
+                        <span class="mt-[3px] w-1.5 h-1.5 rounded-full bg-gray-700 flex-shrink-0"></span>
+                        <span>${nl2br(text)}</span>
+                    </div>
+                `;
+            }).join("")}
+        </div>
     `;
 }
-
 function buildPhotoHtml(initials, photoUrl, shape) {
     const shapeClass =
         shape === "circle" ? "rounded-full" : "rounded-md";

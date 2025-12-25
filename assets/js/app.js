@@ -38,6 +38,17 @@ document.addEventListener("DOMContentLoaded", () => {
     const file = e.target.files[0];
     if (!file) return;
 
+    // Validate file type
+    const result = Validator.validate(e.target);
+    if (!result.valid) {
+      Validator.showError(e.target, result.message);
+      // Clear the file input
+      e.target.value = '';
+      return;
+    } else {
+      Validator.showSuccess(e.target);
+    }
+
     const reader = new FileReader();
     reader.onload = () => {
       photoDataUrl = reader.result;
@@ -153,15 +164,27 @@ document.addEventListener("DOMContentLoaded", () => {
     autoFocusCurrentStep();
   }
 
-  nextBtn.addEventListener("click", () => {
-    if (!window.validateCurrentStep()) return;
+  console.log('Setting up Next button event listener');
+  if (nextBtn) {
+    console.log('Next button found:', nextBtn);
+    nextBtn.addEventListener("click", () => {
+      console.log('Next button clicked');
+      if (!window.validateCurrentStep()) {
+        console.log('Validation failed, not proceeding');
+        return;
+      }
 
-    if (currentStep < totalSteps) {
-      setStep(currentStep + 1);
-    } else {
-      openPreview();
-    }
-  });
+      if (currentStep < totalSteps) {
+        console.log('Moving to next step:', currentStep + 1);
+        setStep(currentStep + 1);
+      } else {
+        console.log('Opening preview');
+        openPreview();
+      }
+    });
+  } else {
+    console.error('Next button not found!');
+  }
 
   prevBtn.addEventListener("click", () => {
     if (currentStep > 1) {
@@ -190,6 +213,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (e.key === 'Enter' && e.target.matches('input:not([type="submit"]):not([type="button"])')) {
       e.preventDefault();
+
+      // Handle file input: trigger file picker
+      if (e.target.type === 'file') {
+        e.target.click();
+        return;
+      }
+
+      // Handle date input: trigger date picker
+      if (e.target.type === 'date') {
+        // Date inputs open picker automatically on focus/click, but we can ensure it's focused
+        e.target.showPicker && e.target.showPicker();
+        return;
+      }
+
       const currentStepEl = steps[currentStep - 1];
       if (!currentStepEl) return;
 
@@ -271,12 +308,12 @@ document.addEventListener("DOMContentLoaded", () => {
           </div>
           <div class="form-group">
             <label class="block text-xs font-medium text-gray-700 mb-1">End Date <span class="text-red-500">*</span></label>
-            <input 
-              data-field="endDate" 
-              type="date" 
+            <input
+              data-field="endDate"
+              type="date"
               class="w-full px-2 py-1.5 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-resume-primary focus:border-transparent outline-none transition-colors"
               required
-              data-validation="required">
+              data-validation="required|dateGreaterThan:startDate">
             <div class="validation-message"></div>
           </div>
         </div>
@@ -416,6 +453,7 @@ document.addEventListener("DOMContentLoaded", () => {
                      focus:ring-2 focus:ring-resume-primary focus:border-transparent
                      outline-none transition-colors"
               required
+              data-validation="required|yearGreaterThan:startYear"
               placeholder="2020">
             <div class="validation-message"></div>
           </div>
@@ -657,6 +695,28 @@ document.addEventListener("DOMContentLoaded", () => {
 
     Validator.messages.year =
       "Please enter a valid year (1950-present)";
+
+    Validator.rules.dateGreaterThan = (value, param) => {
+      if (!value) return true;
+      const startDateValue = document.querySelector(`[data-field="${param}"]`)?.value;
+      if (!startDateValue) return true;
+      return new Date(value) >= new Date(startDateValue);
+    };
+
+    Validator.messages.dateGreaterThan =
+      "End date must be on or after start date";
+
+    Validator.rules.yearGreaterThan = (value, param) => {
+      if (!value) return true;
+      const startYearValue = document.querySelector(`[data-field="${param}"]`)?.value;
+      if (!startYearValue) return true;
+      const endYear = parseInt(value, 10);
+      const startYear = parseInt(startYearValue, 10);
+      return endYear >= startYear;
+    };
+
+    Validator.messages.yearGreaterThan =
+      "End year must be on or after start year";
   }
 
   // ---------- ENHANCED STEP VALIDATION ----------
@@ -665,26 +725,59 @@ document.addEventListener("DOMContentLoaded", () => {
     const currentStepEl = document.querySelector(".form-step:not(.hidden)");
     if (!currentStepEl) return true;
 
+    console.log('Validating current step:', currentStepEl.id);
+
     const inputs = currentStepEl.querySelectorAll("[data-validation]");
     let isValid = true;
     let firstInvalidInput = null;
 
     inputs.forEach((input) => {
+      // Skip file inputs as they are handled separately
+      if (input.type === "file") return;
+
       const result = Validator.validate(input);
       const isRequired =
         input.hasAttribute("required") ||
         (input.dataset.validation || "").includes("required");
 
-      if (!result.valid && (input.value.trim() !== "" || isRequired)) {
+      const hasValue = input.value.trim() !== "";
+
+      console.log(`Input ${input.id || input.name}: valid=${result.valid}, hasValue=${hasValue}, isRequired=${isRequired}, message=${result.message || 'none'}`);
+
+      if (!result.valid && (hasValue || isRequired)) {
         Validator.showError(input, result.message);
         isValid = false;
         if (!firstInvalidInput) firstInvalidInput = input;
-      } else if (input.value.trim() !== "" || input.type === "file") {
+      } else if (hasValue) {
         Validator.showSuccess(input);
       }
     });
 
+    console.log('Overall isValid:', isValid);
+
     const stepId = currentStepEl.id;
+
+    // Special check for photo in step 1
+    if (stepId === "step-1") {
+      console.log('Validating step-1: photo check');
+      const photoInput = document.getElementById("photo-upload");
+      console.log('Photo input found:', !!photoInput);
+      if (photoInput) {
+        console.log('Photo files length:', photoInput.files.length);
+        console.log('Photo files:', photoInput.files);
+      }
+      if (photoInput && photoInput.files.length === 0) {
+        console.log('Photo validation failed: no file uploaded');
+        Validator.showError(photoInput, "Profile photo is required");
+        isValid = false;
+        if (!firstInvalidInput) firstInvalidInput = photoInput;
+      } else if (photoInput) {
+        console.log('Photo validation passed');
+        Validator.showSuccess(photoInput);
+      } else {
+        console.log('Photo input not found');
+      }
+    }
 
     if (stepId === "step-2") {
       const experiences = document.querySelectorAll(
@@ -806,16 +899,14 @@ document.addEventListener("DOMContentLoaded", () => {
   // ---------- COLLECT FORM DATA ----------
 
   function collectFormData() {
-    const fd = new FormData(form);
-
     const data = {
-      firstName: (fd.get("firstName") || "").toString().trim(),
-      lastName: (fd.get("lastName") || "").toString().trim(),
-      title: (fd.get("title") || "").toString().trim(),
-      email: (fd.get("email") || "").toString().trim(),
-      phone: (fd.get("phone") || "").toString().trim(),
-      location: (fd.get("location") || "").toString().trim(),
-      summary: (fd.get("summary") || "").toString().trim(),
+      first_name: (document.getElementById("firstName").value || "").trim(),
+      last_name: (document.getElementById("lastName").value || "").trim(),
+      title: (document.getElementById("title").value || "").trim(),
+      email: (document.getElementById("email").value || "").trim(),
+      phone: (document.getElementById("phone").value || "").trim(),
+      location: (document.getElementById("location").value || "").trim(),
+      summary: (document.getElementById("summary").value || "").trim(),
     };
 
     data.experience = [];
@@ -827,9 +918,9 @@ document.addEventListener("DOMContentLoaded", () => {
           item.querySelector('[data-field="company"]')?.value.trim() || "",
         location:
           item.querySelector('[data-field="location"]')?.value.trim() || "",
-        startDate:
+        start_date:
           item.querySelector('[data-field="startDate"]')?.value.trim() || "",
-        endDate:
+        end_date:
           item.querySelector('[data-field="endDate"]')?.value.trim() || "",
         description:
           item.querySelector('[data-field="description"]')?.value.trim() ||
@@ -846,9 +937,9 @@ document.addEventListener("DOMContentLoaded", () => {
           item.querySelector('[data-field="institution"]')?.value.trim() || "",
         location:
           item.querySelector('[data-field="location"]')?.value.trim() || "",
-        startYear:
+        start_year:
           item.querySelector('[data-field="startYear"]')?.value.trim() || "",
-        endYear:
+        end_year:
           item.querySelector('[data-field="endYear"]')?.value.trim() || "",
         details:
           item.querySelector('[data-field="details"]')?.value.trim() || "",
@@ -900,7 +991,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     return experiences
       .map((exp) => {
-        const dateStr = [exp.startDate, exp.endDate || "Present"]
+        const dateStr = [exp.start_date, exp.end_date || "Present"]
           .filter(Boolean)
           .join(" - ");
         const companyLine = [exp.company, exp.location]
@@ -932,7 +1023,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     return education
       .map((ed) => {
-        const years = [ed.startYear, ed.endYear].filter(Boolean).join(" - ");
+        const years = [ed.start_year, ed.end_year].filter(Boolean).join(" - ");
         const instLine = [ed.institution, ed.location]
           .filter(Boolean)
           .join(" • ");
@@ -996,16 +1087,22 @@ document.addEventListener("DOMContentLoaded", () => {
     `;
   }
 
-  function renderAchievements(achievements) {
-    if (!achievements || !achievements.length) {
-      return `<p class="text-xs text-gray-500">No achievements added.</p>`;
-    }
-    return `
-      <ul class="list-disc ml-4 space-y-1 text-xs text-gray-700">
-        ${achievements.map((a) => `<li>${nl2br(a)}</li>`).join("")}
-      </ul>
-    `;
+ function renderAchievements(achievements) {
+  if (!achievements || !achievements.length) {
+    return `<p class="text-xs text-gray-500">No achievements added.</p>`;
   }
+
+  return `
+    <div class="space-y-1 text-xs text-gray-700">
+      ${achievements.map(a => `
+        <div class="flex items-start gap-1">
+          <span class="mt-[3px] w-1.5 h-1.5 rounded-full bg-gray-700 flex-shrink-0"></span>
+          <span>${nl2br(a)}</span>
+        </div>
+      `).join("")}
+    </div>
+  `;
+}
 
   function buildPhotoHtml(initials) {
     const shapeClass =
@@ -1028,9 +1125,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function generateLayout1(data) {
     const fullName =
-      `${data.firstName || ""} ${data.lastName || ""}`.trim() || "Your Name";
+      `${data.first_name || ""} ${data.last_name || ""}`.trim();
     const initials =
-      (data.firstName?.[0] || "") + (data.lastName?.[0] || "");
+      (data.first_name?.[0] || "") + (data.last_name?.[0] || "");
     const summaryHtml = nl2br(data.summary || "");
 
     return `
@@ -1118,9 +1215,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function generateLayout2(data) {
     const fullName =
-      `${data.firstName || ""} ${data.lastName || ""}`.trim() || "Your Name";
+      `${data.first_name || ""} ${data.last_name || ""}`.trim() ;
     const initials =
-      (data.firstName?.[0] || "") + (data.lastName?.[0] || "");
+      (data.first_name?.[0] || "") + (data.last_name?.[0] || "");
     const summaryHtml = nl2br(data.summary || "");
 
     return `
@@ -1206,9 +1303,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function generateLayout3(data) {
     const fullName =
-      `${data.firstName || ""} ${data.lastName || ""}`.trim() || "Your Name";
+      `${data.first_name || ""} ${data.last_name || ""}`.trim();
     const initials =
-      (data.firstName?.[0] || "") + (data.lastName?.[0] || "");
+      (data.first_name?.[0] || "") + (data.last_name?.[0] || "");
     const summaryHtml = nl2br(data.summary || "");
 
     const shapeClass =
@@ -1345,184 +1442,7 @@ document.addEventListener("DOMContentLoaded", () => {
     generateResumePreview();
   };
 
-  // ---------- FIXED DOWNLOAD PDF FUNCTION ----------
 
-  window.downloadPDF = async function () {
-    try {
-      // 1. Check if libraries are loaded
-      if (!window.html2canvas || !window.jspdf) {
-        showAlert("PDF libraries not loaded. Please refresh the page.", "error", 5000);
-        return;
-      }
-      const { jsPDF } = window.jspdf;
-
-      // 2. Ensure preview is generated and up to date
-      if (typeof generateResumePreview === 'function') {
-        generateResumePreview();
-      }
-
-      // 3. Get form data and regenerate resume HTML for PDF
-      const data = collectFormData();
-      const pdfData = {
-        first_name: data.firstName,
-        last_name: data.lastName,
-        title: data.title,
-        email: data.email,
-        phone: data.phone,
-        location: data.location,
-        summary: data.summary,
-        experience: data.experience,
-        education: data.education,
-        skills: data.skills,
-        languages: data.languages,
-        achievements: data.achievements
-      };
-      let html = "";
-
-      switch (currentLayout) {
-        case "2":
-          html = window.resumeLayouts.generateLayout2(pdfData, currentFontClass, currentPhotoShape, photoDataUrl);
-          break;
-        case "3":
-          html = window.resumeLayouts.generateLayout3(pdfData, currentFontClass, currentPhotoShape, photoDataUrl);
-          break;
-        case "1":
-        default:
-          html = window.resumeLayouts.generateLayout1(pdfData, currentFontClass, currentPhotoShape, photoDataUrl);
-          break;
-      }
-
-      if (!html || html.length < 100) {
-        showAlert('Resume content is empty or incomplete. Please try again.', "error", 5000);
-        return;
-      }
-
-      // 5. Inform user
-      showAlert('Generating PDF, please wait...', 'info', 15000);
-
-      // 6. Create an off-screen A4 clone to render (avoid transforms/scroll issues)
-      const printContainer = document.createElement('div');
-      printContainer.style.cssText = `
-        position: fixed;
-        top: -10000px;
-        left: -10000px;
-        width: auto;
-        height: auto;
-        background: white;
-        z-index: -1;
-        overflow: visible;
-        display: block;
-        opacity: 1;
-        pointer-events: none;
-        user-select: none;
-        visibility: visible;
-      `;
-
-      const printPaper = document.createElement('div');
-      printPaper.className = 'a4-paper';
-      printPaper.style.cssText = `
-        width: 210mm;
-        height: 297mm;
-        min-height: 297mm;
-        margin: 0;
-        box-shadow: none;
-        transform: none;
-        -webkit-print-color-adjust: exact;
-        print-color-adjust: exact;
-        background: white;
-      `;
-
-      // Copy current preview HTML into the hidden A4 paper
-      printPaper.innerHTML = html;
-      printContainer.appendChild(printPaper);
-      document.body.appendChild(printContainer);
-
-      // 7. Make sure any Lucide icons are rendered in the cloned content
-      if (window.lucide) {
-        lucide.createIcons();
-      }
-
-      // 8. Wait for images inside the clone to load
-      const images = printPaper.querySelectorAll('img');
-      await Promise.all(
-        Array.from(images).map((img) =>
-          new Promise((resolve) => {
-            if (img.complete && img.naturalHeight !== 0) {
-              resolve();
-            } else {
-              img.onload = () => resolve();
-              img.onerror = () => resolve();
-            }
-          })
-        )
-      );
-
-      // Small delay to allow layout to settle
-      await new Promise((r) => setTimeout(r, 50));
-
-      // 9. Capture the hidden A4 using html2canvas (no transforms, no custom windowWidth/Height)
-      const canvas = await html2canvas(printPaper, {
-        scale: 2,
-        useCORS: true,
-        allowTaint: true,
-        backgroundColor: '#ffffff',
-        logging: false
-      });
-
-      // Remove temporary container from DOM
-      document.body.removeChild(printContainer);
-
-      // 10. Sanity checks on the canvas
-      if (canvas.width === 0 || canvas.height === 0) {
-        console.error('Canvas dimensions:', canvas.width, canvas.height);
-        showAlert('Failed to capture resume content. Canvas is empty.', 'error', 5000);
-        return;
-      }
-
-      const imgData = canvas.toDataURL('image/png', 1.0);
-      if (!imgData || imgData === 'data:,' || imgData.length < 1000) {
-        console.error('Image data length:', imgData ? imgData.length : 0);
-        showAlert('Failed to generate image data.', 'error', 5000);
-        return;
-      }
-
-      // 11. Create PDF and scale image to fit A4
-      const pdf = new jsPDF('p', 'mm', 'a4');
-      const pdfWidth = pdf.internal.pageSize.getWidth();   // 210
-      const pdfHeight = pdf.internal.pageSize.getHeight(); // 297
-
-      const canvasAspectRatio = canvas.width / canvas.height;
-      const pdfAspectRatio = pdfWidth / pdfHeight;
-
-      let renderWidth, renderHeight, offsetX = 0, offsetY = 0;
-
-      if (canvasAspectRatio > pdfAspectRatio) {
-        // Fit to width
-        renderWidth = pdfWidth;
-        renderHeight = pdfWidth / canvasAspectRatio;
-        offsetY = (pdfHeight - renderHeight) / 2;
-      } else {
-        // Fit to height
-        renderHeight = pdfHeight;
-        renderWidth = pdfHeight * canvasAspectRatio;
-        offsetX = (pdfWidth - renderWidth) / 2;
-      }
-
-      pdf.addImage(imgData, 'PNG', offsetX, offsetY, renderWidth, renderHeight);
-
-      // 12. Generate filename from user's name
-      const firstName = document.getElementById('firstName')?.value || '';
-      const lastName = document.getElementById('lastName')?.value || '';
-      const trainerName = `${firstName}_${lastName}`.trim().replace(/\s+/g, '_') || 'trainer_profile';
-
-      pdf.save(`${trainerName}_profile.pdf`);
-      showAlert('PDF downloaded successfully!', 'success', 3000);
-
-    } catch (error) {
-      console.error('Download PDF error:', error);
-      showAlert('An unexpected error occurred: ' + error.message, 'error', 5000);
-    }
-  };
 
   // ---------- SUBMIT PROFILE ----------
 
@@ -1580,6 +1500,7 @@ document.addEventListener("DOMContentLoaded", () => {
       generateResumePreview();
     });
   }
+
 
   // ---------- INITIALIZE ----------
 

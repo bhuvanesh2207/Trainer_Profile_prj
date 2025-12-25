@@ -36,8 +36,8 @@ try {
     $stmt = $pdo->prepare($sql);
 
     $stmt->execute([
-        ':first_name'   => $_POST['firstName'] ?? '',
-        ':last_name'    => $_POST['lastName'] ?? '',
+        ':first_name'   => $_POST['first_name'] ?? '',
+        ':last_name'    => $_POST['last_name'] ?? '',
         ':title'        => $_POST['title'] ?? '',
         ':email'        => $_POST['email'] ?? '',
         ':phone'        => $_POST['phone'] ?? '',
