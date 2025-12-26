@@ -27,7 +27,8 @@ require '../api/db.php';
                 extend: {
                     colors: {
                         resume: {
-                            primary: '#5D1F2F',
+                            primary: '#ec1d25',
+                            secondary: '#ffe500',
                             accent: '#9d4edd',
                             blue: '#1e40af',
                             slate: '#334155'
@@ -150,27 +151,30 @@ require '../api/db.php';
     </style>
 </head>
 
-<body class="bg-gray-50 min-h-screen">
+<body class=" min-h-screen bg-white">
 
     <!-- Navbar -->
-    <nav class="bg-white shadow-sm px-6 py-4 flex justify-between items-center sticky top-0 z-10">
-        <h1 class="text-xl font-bold text-resume-primary flex items-center gap-2">
+    <nav class="bg-[#ffe500] shadow-sm px-6 py-4 flex justify-between items-center sticky top-0 z-10">
+        <h1 class="text-xl font-bold text-black-500 flex items-center gap-2">
             <i data-lucide="layout-dashboard" class="w-5 h-5"></i> Admin Dashboard
         </h1>
         <div class="flex items-center gap-4">
-            <span class="text-sm font-semibold text-black">Welcome, Admin</span>
+            <span class="text-sm font-semibold text-black-500">Welcome, Admin</span>
             <form action="/trainer_profile/admin/logout" method="POST">
-                <button type="submit" class="flex items-center gap-2 px-3 py-1.5 border rounded text-sm font-semibold hover:bg-gray-50" style="border-color:#5D1F2F; color:#5D1F2F;">
-                    <span class="material-icons text-base">logout</span>
-                    Logout
-                </button>
+                <button type="submit" 
+        class="flex items-center gap-2 px-3 py-1.5 border border-transparent rounded text-sm font-semibold hover:border-black " 
+        style="color:black;">
+    <span class="material-icons text-base">logout</span>
+    Logout
+</button>
+
             </form>
         </div>
     </nav>
 
     <main class="max-w-6xl mx-auto p-6">
         <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
-            <h2 class="text-lg font-semibold text-gray-800">Trainer Profiles</h2>
+            <h2 class="text-lg font-bold text-[#ec1d25]">Trainer Profiles</h2>
             <div class="relative w-full md:w-auto">
                 <span class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-base">search</span>
                 <input
@@ -183,15 +187,15 @@ require '../api/db.php';
 
         <div class="bg-white rounded-lg shadow overflow-x-auto">
             <table class="min-w-full text-left">
-                <thead class="bg-gray-50 border-b">
-                    <tr class="bg-gray-50 border-b">
+                <thead class="bg-[#ffe500] border-b">
+                    <tr class="bg-[#ffe500] border-b">
                         <th class="px-6 py-3 text-sm font-extrabold text-resume-primary uppercase">Name</th>
                         <th class="px-6 py-3 text-sm font-extrabold text-resume-primary uppercase">Role</th>
                         <th class="px-6 py-3 text-sm font-extrabold text-resume-primary uppercase">Email</th>
                         <th class="px-6 py-3 text-sm font-extrabold text-resume-primary uppercase text-right">Actions</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-200" id="trainer-table">
+                <tbody class="divide" id="trainer-table">
                     <!-- Dynamic Data Injected Here -->
                 </tbody>
             </table>

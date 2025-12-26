@@ -53,23 +53,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             theme: {
                 extend: {
                     colors: {
-                        resume: { primary: '#5D1F2F' }
+                        resume: { primary: '#ec1d25' }
                     }
                 }
             }
         }
     </script>
+    <style>.login-card {
+  box-shadow: 
+    0 0 0 1.5px rgba(244, 248, 2, 1),
+    0 20px 40px rgba(0, 0, 0, 0.15),
+    0 15px 60px rgba(234, 219, 8, 0.58);
+}
+</style>
 </head>
-<body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
-    
-    <div class="bg-white p-8 rounded-xl shadow-lg w-full max-w-md">
+<body class="bg-white min-h-screen flex items-center justify-center p-4">
+<div class="login-card p-8 rounded-xl w-full max-w-md bg-white
+            border-2 border-[#ec1d25]">
+
+
         <div class="flex flex-col items-center mb-6">
-           <div class="w-12 h-12 bg-resume-primary rounded-full flex items-center justify-center text-white mb-4">
-            <span class="material-icons text-white">lock</span>
+           <div class="w-12 h-12 bg-resume-primary rounded-full flex items-center justify-center text-red-500 mb-4">
+            <span class="material-icons text-white text-3xl">person</span>
         </div>
 
-            <h1 class="text-2xl font-bold text-gray-800">Admin Login</h1>
-            <p class="text-gray-500 text-sm">Enter your credentials to access the dashboard</p>
+            <h1 class="text-2xl font-bold text-[#ec1d25]">Admin Login</h1>
+            <p class="text-balck font-bold text-sm">Enter your credentials to access the dashboard</p>
         </div>
 
         <!-- Display PHP error if any -->
@@ -82,21 +91,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <form method="POST" class="space-y-4">
             
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Username</label>
-                <input type="text" name="username" id="username" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-resume-primary outline-none" required>
+                <label class="block text-base  font-medium text-black mb-1">Username</label>
+                <input type="text" name="username" id="username" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:black outline-none" required>
             </div>
     
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
-                <input type="password" name="password" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-resume-primary outline-none" required>
+                <label class="block text-base  font-medium text-black mb-1">Password</label>
+                <input type="password" name="password" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:black outline-none" required>
             </div>
 
-            <button type="submit" class="w-full py-2 bg-resume-primary text-white rounded-md font-medium hover:bg-opacity-90 transition-colors">
-                Sign In
-            </button>
+            <button class="w-full py-2 bg-[#ec1d25] text-white rounded-md font-medium hover:bg-opacity-90 transition-colors">
+    Sign In
+</button>
+
+
         </form>
         <div class="text-center mt-4">
-            <a href="../form" class="text-gray-500 hover:text-[#5D1F2F] text-sm font-medium no-underline">
+            <a href="../form" class="text-black hover:text-[#ec1d25] text-sm font-medium no-underline">
                 Back to Form
             </a>
         </div>

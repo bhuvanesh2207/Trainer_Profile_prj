@@ -243,408 +243,429 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // ---------- DYNAMIC SECTIONS ----------
-
-  window.addExperience = function (skipAlert = false) {
-    experienceCount++;
-    const wrapper = document.createElement("div");
-    wrapper.className =
-      "experience-item border border-gray-200 rounded-lg p-4 relative bg-gray-50";
-    wrapper.innerHTML = `
-      <button type="button" class="absolute top-2 right-2 text-gray-400 hover:text-red-500" onclick="removeExperience(this)">
-        <i data-lucide="x" class="w-4 h-4"></i>
-      </button>
-      <div class="grid md:grid-cols-2 gap-4 mb-3">
-        <div class="form-group">
-          <label class="block text-xs font-medium text-gray-700 mb-1">
-            Position <span class="text-red-500">*</span>
-          </label>
-          <input 
-            data-field="position" 
-            type="text" 
-            class="w-full px-2 py-1.5 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-resume-primary focus:border-transparent outline-none transition-colors" 
-            required
-            data-validation="required"
-            placeholder="e.g. Senior Trainer">
-          <div class="validation-message"></div>
-        </div>
-        <div class="form-group">
-          <label class="block text-xs font-medium text-gray-700 mb-1">
-            Company <span class="text-red-500">*</span>
-          </label>
-          <input 
-            data-field="company" 
-            type="text" 
-            class="w-full px-2 py-1.5 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-resume-primary focus:border-transparent outline-none transition-colors" 
-            required
-            data-validation="required"
-            placeholder="e.g. ABC Corporation">
-          <div class="validation-message"></div>
-        </div>
-      </div>
-      <div class="grid md:grid-cols-2 gap-4 mb-3">
-        <div class="form-group">
-          <label class="block text-xs font-medium text-gray-700 mb-1">Location <span class="text-red-500">*</span></label>
-          <input 
-            data-field="location" 
-            type="text" 
-            class="w-full px-2 py-1.5 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-resume-primary focus:border-transparent outline-none transition-colors"
-            required
-            data-validation="required"
-            placeholder="e.g. New York, NY">
-          <div class="validation-message"></div>
-        </div>
-        <div class="grid grid-cols-2 gap-2">
-          <div class="form-group">
-            <label class="block text-xs font-medium text-gray-700 mb-1">
-              Start Date <span class="text-red-500">*</span>
-            </label>
-            <input 
-              data-field="startDate" 
-              type="date" 
-              class="w-full px-2 py-1.5 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-resume-primary focus:border-transparent outline-none transition-colors"
-              required
-              data-validation="required">
-            <div class="validation-message"></div>
-          </div>
-          <div class="form-group">
-            <label class="block text-xs font-medium text-gray-700 mb-1">End Date <span class="text-red-500">*</span></label>
-            <input
-              data-field="endDate"
-              type="date"
-              class="w-full px-2 py-1.5 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-resume-primary focus:border-transparent outline-none transition-colors"
-              required
-              data-validation="required|dateGreaterThan:startDate">
-            <div class="validation-message"></div>
-          </div>
-        </div>
-      </div>
+window.addExperience = function (skipAlert = false) {
+  experienceCount++;
+  const wrapper = document.createElement("div");
+  wrapper.className =
+    "experience-item border border-gray-200 rounded-lg p-4 relative bg-white";
+  wrapper.innerHTML = `
+    <button type="button" class="absolute top-2 right-2 text-gray-400 hover:text-red-500" onclick="removeExperience(this)">
+      <i data-lucide="x" class="w-4 h-4"></i>
+    </button>
+    <div class="grid md:grid-cols-2 gap-4 mb-3">
       <div class="form-group">
-        <label class="block text-xs font-medium text-gray-700 mb-1">
-          Description <span class="text-red-500">*</span>
+        <label class="block text-ls font-medium text-black mb-1">
+          Position <span class="text-red-500">*</span>
         </label>
-        <textarea 
-          data-field="description" 
-          rows="3" 
-          class="w-full px-2 py-1.5 border border-gray-300 rounded-md text-sm resize-none focus:ring-2 focus:ring-resume-primary focus:border-transparent outline-none transition-colors" 
-          placeholder="Key responsibilities, achievements, results..."
+        <input 
+          data-field="position" 
+          type="text" 
+          class="w-full px-3 py-2 border border-gray-300 rounded-md text-base
+                 focus:border-black focus:ring-0
+                 outline-none transition-colors" 
           required
-          data-validation="required"></textarea>
+          data-validation="required"
+          placeholder="e.g. Senior Trainer">
         <div class="validation-message"></div>
       </div>
-    `;
-    experienceContainer.appendChild(wrapper);
-
-    setupDynamicValidation(wrapper);
-
-    if (window.lucide) lucide.createIcons();
-
-    if (!skipAlert) {
-      showAlert("Experience section added successfully!", "success", 3000);
-      const firstInput = wrapper.querySelector('input[data-field="position"]');
-      if (firstInput) {
-        setTimeout(() => {
-          firstInput.focus();
-          firstInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }, 100);
-      }
-    }
-  };
-
-  window.removeExperience = function (btn) {
-    if (confirm("Are you sure you want to remove this experience?")) {
-      btn.closest(".experience-item").remove();
-      showAlert("Experience removed", "info", 2000);
-    }
-  };
-
-  window.addEducation = function (skipAlert = false) {
-    educationCount++;
-
-    const wrapper = document.createElement("div");
-    wrapper.className =
-      "education-item border border-gray-200 rounded-lg p-4 relative bg-gray-50";
-
-    wrapper.innerHTML = `
-      <button type="button"
-        class="absolute top-2 right-2 text-gray-400 hover:text-red-500"
-        onclick="removeEducation(this)">
-        <i data-lucide="x" class="w-4 h-4"></i>
-      </button>
-
-      <div class="grid md:grid-cols-2 gap-4 mb-3">
+      <div class="form-group">
+        <label class="block text-ls font-medium text-black mb-1">
+          Company <span class="text-red-500">*</span>
+        </label>
+        <input 
+          data-field="company" 
+          type="text" 
+          class="w-full px-3 py-2 border border-gray-300 rounded-md text-base
+                 focus:border-black focus:ring-0
+                 outline-none transition-colors" 
+          required
+          data-validation="required"
+          placeholder="e.g. ABC Corporation">
+        <div class="validation-message"></div>
+      </div>
+    </div>
+    <div class="grid md:grid-cols-2 gap-4 mb-3">
+      <div class="form-group">
+        <label class="block text-ls font-medium text-black mb-1">Location <span class="text-red-500">*</span></label>
+        <input 
+          data-field="location" 
+          type="text" 
+          class="w-full px-3 py-2 border border-gray-300 rounded-md text-base
+                 focus:border-black focus:ring-0
+                 outline-none transition-colors"
+          required
+          data-validation="required"
+          placeholder="e.g. New York, NY">
+        <div class="validation-message"></div>
+      </div>
+      <div class="grid grid-cols-2 gap-4">
         <div class="form-group">
-          <label class="block text-xs font-medium text-gray-700 mb-1">
-            Degree / Course <span class="text-red-500">*</span>
+          <label class="block text-ls font-medium text-black mb-1">
+            Start Date <span class="text-red-500">*</span>
           </label>
-          <input
-            data-field="degree"
-            type="text"
-            class="w-full px-2 py-1.5 border border-gray-300 rounded-md text-sm
-                   focus:ring-2 focus:ring-resume-primary focus:border-transparent
+          <input 
+            data-field="startDate" 
+            type="date" 
+            class="w-full px-3 py-2 border border-gray-300 rounded-md text-base
+                   focus:border-black focus:ring-0
                    outline-none transition-colors"
             required
-            data-validation="required|minLength:2|maxLength:100"
-            placeholder="e.g. Master of Education">
+            data-validation="required">
           <div class="validation-message"></div>
         </div>
-
         <div class="form-group">
-          <label class="block text-xs font-medium text-gray-700 mb-1">
-            Institution <span class="text-red-500">*</span>
-          </label>
+          <label class="block text-ls font-medium text-black mb-1">End Date <span class="text-red-500">*</span></label>
           <input
-            data-field="institution"
-            type="text"
-            class="w-full px-2 py-1.5 border border-gray-300 rounded-md text-sm
-                   focus:ring-2 focus:ring-resume-primary focus:border-transparent
+            data-field="endDate"
+            type="date"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md text-base
+                   focus:border-black focus:ring-0
                    outline-none transition-colors"
             required
-            data-validation="required|minLength:2|maxLength:100"
-            placeholder="e.g. University of XYZ">
+            data-validation="required|dateGreaterThan:startDate">
           <div class="validation-message"></div>
         </div>
       </div>
+    </div>
+    <div class="form-group">
+      <label class="block text-ls font-medium text-black mb-1">
+        Description <span class="text-red-500">*</span>
+      </label>
+      <textarea 
+        data-field="description" 
+        rows="3" 
+        class="w-full px-3 py-2 border border-gray-300 rounded-md text-base
+               resize-none focus:border-black focus:ring-0
+               outline-none transition-colors" 
+        placeholder="Key responsibilities, achievements, results..."
+        required
+        data-validation="required"></textarea>
+      <div class="validation-message"></div>
+    </div>
+  `;
+  experienceContainer.appendChild(wrapper);
 
-      <div class="grid md:grid-cols-2 gap-4 mb-3">
-        <div class="form-group">
-          <label class="block text-xs font-medium text-gray-700 mb-1">
-            Location <span class="text-red-500">*</span>
-          </label>
-          <input
-            data-field="location"
-            type="text"
-            class="w-full px-2 py-1.5 border border-gray-300 rounded-md text-sm
-                   focus:ring-2 focus:ring-resume-primary focus:border-transparent
-                   outline-none transition-colors"
-            required
-            data-validation="required"
-            placeholder="e.g. Boston, MA">
-          <div class="validation-message"></div>
-        </div>
+  setupDynamicValidation(wrapper);
 
-        <div class="grid grid-cols-2 gap-2">
-          <div class="form-group">
-            <label class="block text-xs font-medium text-gray-700 mb-1">
-              Start Year <span class="text-red-500">*</span>
-            </label>
-            <input
-              data-field="startYear"
-              type="text"
-              maxlength="4"
-              inputmode="numeric"
-              class="year-input w-full px-2 py-1.5 border border-gray-300 rounded-md text-sm
-                     focus:ring-2 focus:ring-resume-primary focus:border-transparent
-                     outline-none transition-colors"
-              required
-              placeholder="2018">
-            <div class="validation-message"></div>
-          </div>
+  if (window.lucide) lucide.createIcons();
 
-          <div class="form-group">
-            <label class="block text-xs font-medium text-gray-700 mb-1">
-              End Year <span class="text-red-500">*</span>
-            </label>
-            <input
-              data-field="endYear"
-              type="text"
-              maxlength="4"
-              inputmode="numeric"
-              class="year-input w-full px-2 py-1.5 border border-gray-300 rounded-md text-sm
-                     focus:ring-2 focus:ring-resume-primary focus:border-transparent
-                     outline-none transition-colors"
-              required
-              data-validation="required|yearGreaterThan:startYear"
-              placeholder="2020">
-            <div class="validation-message"></div>
-          </div>
-        </div>
+  if (!skipAlert) {
+    showAlert("Experience section added successfully!", "success", 3000);
+    const firstInput = wrapper.querySelector('input[data-field="position"]');
+    if (firstInput) {
+      setTimeout(() => {
+        firstInput.focus();
+        firstInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 100);
+    }
+  }
+};
+
+window.removeExperience = function (btn) {
+  if (confirm("Are you sure you want to remove this experience?")) {
+    btn.closest(".experience-item").remove();
+    showAlert("Experience removed", "info", 2000);
+  }
+};
+
+window.addEducation = function (skipAlert = false) {
+  educationCount++;
+
+  const wrapper = document.createElement("div");
+  wrapper.className =
+    "education-item border border-gray-200 rounded-lg p-4 relative bg-white";
+
+  wrapper.innerHTML = `
+    <button type="button"
+      class="absolute top-2 right-2 text-gray-400 hover:text-red-500"
+      onclick="removeEducation(this)">
+      <i data-lucide="x" class="w-4 h-4"></i>
+    </button>
+
+    <div class="grid md:grid-cols-2 gap-4 mb-3">
+      <div class="form-group">
+        <label class="block text-ls font-medium text-black mb-1">
+          Degree / Course <span class="text-red-500">*</span>
+        </label>
+        <input
+          data-field="degree"
+          type="text"
+          class="w-full px-3 py-2 border border-gray-300 rounded-md text-base
+                 focus:border-black focus:ring-0
+                 outline-none transition-colors"
+          required
+          data-validation="required|minLength:2|maxLength:100"
+          placeholder="e.g. Master of Education">
+        <div class="validation-message"></div>
       </div>
 
       <div class="form-group">
-        <label class="block text-xs font-medium text-gray-700 mb-1">
-          Details
+        <label class="block text-ls font-medium text-black mb-1">
+          Institution <span class="text-red-500">*</span>
         </label>
-        <textarea
-          data-field="details"
-          rows="2"
-          class="w-full px-2 py-1.5 border border-gray-300 rounded-md text-sm
-                 resize-none focus:ring-2 focus:ring-resume-primary
-                 focus:border-transparent outline-none transition-colors"
-          placeholder="Key subjects, honors, projects..."
-          data-validation="maxLength:300"></textarea>
-        <div class="validation-message"></div>
-      </div>
-    `;
-
-    educationContainer.appendChild(wrapper);
-
-    setupDynamicValidation(wrapper);
-
-    if (window.lucide) lucide.createIcons();
-
-    if (!skipAlert) {
-      showAlert("Education section added successfully!", "success", 3000);
-      const firstInput = wrapper.querySelector('input[data-field="degree"]');
-      if (firstInput) {
-        setTimeout(() => {
-          firstInput.focus();
-          firstInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }, 100);
-      }
-    }
-  };
-
-  window.removeEducation = function (btn) {
-    if (confirm("Are you sure you want to remove this education entry?")) {
-      btn.closest(".education-item").remove();
-      showAlert("Education removed", "info", 2000);
-    }
-  };
-
-  window.addSkill = function (skipAlert = false) {
-    skillCount++;
-    const wrapper = document.createElement("div");
-    wrapper.className = "skill-item flex items-center gap-3";
-    wrapper.innerHTML = `
-      <div class="flex-1 form-group">
-        <input 
-          data-field="skillName" 
-          type="text" 
-          placeholder="e.g. Instructional Design" 
-          class="w-full px-2 py-1.5 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-resume-primary focus:border-transparent outline-none transition-colors"
+        <input
+          data-field="institution"
+          type="text"
+          class="w-full px-3 py-2 border border-gray-300 rounded-md text-base
+                 focus:border-black focus:ring-0
+                 outline-none transition-colors"
           required
-          data-validation="required|maxLength:30">
+          data-validation="required|minLength:2|maxLength:100"
+          placeholder="e.g. University of XYZ">
         <div class="validation-message"></div>
       </div>
-      <select 
-        data-field="skillLevel" 
-        class="px-2 py-1.5 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-resume-primary focus:border-transparent outline-none">
-        <option value="Beginner">Beginner</option>
-        <option value="Intermediate" selected>Intermediate</option>
-        <option value="Advanced">Advanced</option>
-        <option value="Expert">Expert</option>
-      </select>
-      <button type="button" class="text-gray-400 hover:text-red-500 transition-colors" onclick="removeSkill(this)">
-        <i data-lucide="x" class="w-4 h-4"></i>
-      </button>
-    `;
-    skillsContainer.appendChild(wrapper);
+    </div>
 
-    setupDynamicValidation(wrapper);
-
-    if (window.lucide) lucide.createIcons();
-
-    const skillsValidation = document.getElementById("skills-validation");
-    if (skillsValidation) skillsValidation.innerHTML = "";
-
-    if (!skipAlert) {
-      const skillInput = wrapper.querySelector('input[data-field="skillName"]');
-      if (skillInput) {
-        setTimeout(() => {
-          skillInput.focus();
-          skillInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }, 100);
-      }
-    }
-  };
-
-  window.removeSkill = function (btn) {
-    btn.closest(".skill-item").remove();
-  };
-
-  window.addLanguage = function (skipAlert = false) {
-    languageCount++;
-    const wrapper = document.createElement("div");
-    wrapper.className = "language-item flex items-center gap-3";
-    wrapper.innerHTML = `
-      <div class="flex-1 form-group">
-        <input 
-          data-field="languageName" 
-          type="text" 
-          placeholder="e.g. English" 
-          class="w-full px-2 py-1.5 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-resume-primary focus:border-transparent outline-none transition-colors"
+    <div class="grid md:grid-cols-2 gap-4 mb-3">
+      <div class="form-group">
+        <label class="block text-ls font-medium text-black mb-1">
+          Location <span class="text-red-500">*</span>
+        </label>
+        <input
+          data-field="location"
+          type="text"
+          class="w-full px-3 py-2 border border-gray-300 rounded-md text-base
+                 focus:border-black focus:ring-0
+                 outline-none transition-colors"
           required
-          data-validation="required|maxLength:30">
+          data-validation="required"
+          placeholder="e.g. Boston, MA">
         <div class="validation-message"></div>
       </div>
-      <select 
-        data-field="languageLevel" 
-        class="px-2 py-1.5 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-resume-primary focus:border-transparent outline-none">
-        <option value="Basic">Basic</option>
-        <option value="Conversational">Conversational</option>
-        <option value="Fluent" selected>Fluent</option>
-        <option value="Native">Native</option>
-      </select>
-      <button type="button" class="text-gray-400 hover:text-red-500 transition-colors" onclick="removeLanguage(this)">
-        <i data-lucide="x" class="w-4 h-4"></i>
-      </button>
-    `;
-    languagesContainer.appendChild(wrapper);
 
-    setupDynamicValidation(wrapper);
+      <div class="grid grid-cols-2 gap-4">
+        <div class="form-group">
+          <label class="block text-ls font-medium text-black mb-1">
+            Start Year <span class="text-red-500">*</span>
+          </label>
+          <input
+            data-field="startYear"
+            type="text"
+            maxlength="4"
+            inputmode="numeric"
+            class="year-input w-full px-3 py-2 border border-gray-300 rounded-md text-base
+                   focus:border-black focus:ring-0
+                   outline-none transition-colors"
+            required
+            placeholder="2018">
+          <div class="validation-message"></div>
+        </div>
 
-    if (window.lucide) lucide.createIcons();
-
-    const languagesValidation = document.getElementById("languages-validation");
-    if (languagesValidation) languagesValidation.innerHTML = "";
-
-    if (!skipAlert) {
-      const langInput = wrapper.querySelector('input[data-field="languageName"]');
-      if (langInput) {
-        setTimeout(() => {
-          langInput.focus();
-          langInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }, 100);
-      }
-    }
-  };
-
-  window.removeLanguage = function (btn) {
-    btn.closest(".language-item").remove();
-  };
-
-  window.addAchievement = function (skipAlert = false) {
-    achievementCount++;
-    const wrapper = document.createElement("div");
-    wrapper.className = "achievement-item flex gap-3 items-start";
-    wrapper.innerHTML = `
-      <span class="mt-2 text-gray-400">•</span>
-      <div class="flex-1 form-group">
-        <textarea 
-          data-field="achievementText" 
-          rows="2" 
-          class="w-full px-2 py-1.5 border border-gray-300 rounded-md text-sm resize-none focus:ring-2 focus:ring-resume-primary focus:border-transparent outline-none transition-colors" 
-          placeholder="e.g. Delivered 200+ hours of leadership training with 95% positive feedback."
-          required
-          data-validation="required|maxLength:500"></textarea>
-        <div class="validation-message"></div>
+        <div class="form-group">
+          <label class="block text-ls font-medium text-black mb-1">
+            End Year <span class="text-red-500">*</span>
+          </label>
+          <input
+            data-field="endYear"
+            type="text"
+            maxlength="4"
+            inputmode="numeric"
+            class="year-input w-full px-3 py-2 border border-gray-300 rounded-md text-base
+                   focus:border-black focus:ring-0
+                   outline-none transition-colors"
+            required
+            data-validation="required|yearGreaterThan:startYear"
+            placeholder="2020">
+          <div class="validation-message"></div>
+        </div>
       </div>
-      <button type="button" class="mt-1 text-gray-400 hover:text-red-500 transition-colors" onclick="removeAchievement(this)">
-        <i data-lucide="x" class="w-4 h-4"></i>
-      </button>
-    `;
-    achievementsContainer.appendChild(wrapper);
+    </div>
 
-    setupDynamicValidation(wrapper);
+    <div class="form-group">
+      <label class="block text-ls font-medium text-black mb-1">
+        Details
+      </label>
+      <textarea
+        data-field="details"
+        rows="2"
+        class="w-full px-3 py-2 border border-gray-300 rounded-md text-base
+               resize-none focus:border-black focus:ring-0
+               outline-none transition-colors"
+        placeholder="Key subjects, honors, projects..."
+        data-validation="maxLength:300"></textarea>
+      <div class="validation-message"></div>
+    </div>
+  `;
 
-    if (window.lucide) lucide.createIcons();
+  educationContainer.appendChild(wrapper);
 
-    if (!skipAlert) {
-      const achievementInput = wrapper.querySelector('textarea[data-field="achievementText"]');
-      if (achievementInput) {
-        setTimeout(() => {
-          achievementInput.focus();
-          achievementInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }, 100);
-      }
+  setupDynamicValidation(wrapper);
+
+  if (window.lucide) lucide.createIcons();
+
+  if (!skipAlert) {
+    showAlert("Education section added successfully!", "success", 3000);
+    const firstInput = wrapper.querySelector('input[data-field="degree"]');
+    if (firstInput) {
+      setTimeout(() => {
+        firstInput.focus();
+        firstInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 100);
     }
-  };
+  }
+};
 
-  window.removeAchievement = function (btn) {
-    if (confirm("Remove this achievement?")) {
-      btn.closest(".achievement-item").remove();
+window.removeEducation = function (btn) {
+  if (confirm("Are you sure you want to remove this education entry?")) {
+    btn.closest(".education-item").remove();
+    showAlert("Education removed", "info", 2000);
+  }
+};
+
+window.addSkill = function (skipAlert = false) {
+  skillCount++;
+  const wrapper = document.createElement("div");
+  wrapper.className = "skill-item flex items-center gap-3";
+  wrapper.innerHTML = `
+    <div class="flex-1 form-group">
+      <input 
+        data-field="skillName" 
+        type="text" 
+        placeholder="e.g. Instructional Design" 
+        class="w-full px-3 py-2 border border-gray-300 rounded-md text-base
+               focus:border-black focus:ring-0
+               outline-none transition-colors"
+        required
+        data-validation="required|maxLength:30">
+      <div class="validation-message"></div>
+    </div>
+    <select 
+      data-field="skillLevel" 
+      class="px-3 py-2 border border-gray-300 rounded-md text-base
+             focus:border-black focus:ring-0
+             outline-none transition-colors">
+      <option value="Beginner">Beginner</option>
+      <option value="Intermediate" selected>Intermediate</option>
+      <option value="Advanced">Advanced</option>
+      <option value="Expert">Expert</option>
+    </select>
+    <button type="button" class="text-gray-400 hover:text-red-500 transition-colors" onclick="removeSkill(this)">
+      <i data-lucide="x" class="w-4 h-4"></i>
+    </button>
+  `;
+  skillsContainer.appendChild(wrapper);
+
+  setupDynamicValidation(wrapper);
+
+  if (window.lucide) lucide.createIcons();
+
+  const skillsValidation = document.getElementById("skills-validation");
+  if (skillsValidation) skillsValidation.innerHTML = "";
+
+  if (!skipAlert) {
+    const skillInput = wrapper.querySelector('input[data-field="skillName"]');
+    if (skillInput) {
+      setTimeout(() => {
+        skillInput.focus();
+        skillInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 100);
     }
-  };
+  }
+};
+
+window.removeSkill = function (btn) {
+  btn.closest(".skill-item").remove();
+};
+
+window.addLanguage = function (skipAlert = false) {
+  languageCount++;
+  const wrapper = document.createElement("div");
+  wrapper.className = "language-item flex items-center gap-3";
+  wrapper.innerHTML = `
+    <div class="flex-1 form-group">
+      <input 
+        data-field="languageName" 
+        type="text" 
+        placeholder="e.g. English" 
+        class="w-full px-3 py-2 border border-gray-300 rounded-md text-base
+               focus:border-black focus:ring-0
+               outline-none transition-colors"
+        required
+        data-validation="required|maxLength:30">
+      <div class="validation-message"></div>
+    </div>
+    <select 
+      data-field="languageLevel" 
+      class="px-3 py-2 border border-gray-300 rounded-md text-base
+             focus:border-black focus:ring-0
+             outline-none transition-colors">
+      <option value="Basic">Basic</option>
+      <option value="Conversational">Conversational</option>
+      <option value="Fluent" selected>Fluent</option>
+      <option value="Native">Native</option>
+    </select>
+    <button type="button" class="text-gray-400 hover:text-red-500 transition-colors" onclick="removeLanguage(this)">
+      <i data-lucide="x" class="w-4 h-4"></i>
+    </button>
+  `;
+  languagesContainer.appendChild(wrapper);
+
+  setupDynamicValidation(wrapper);
+
+  if (window.lucide) lucide.createIcons();
+
+  const languagesValidation = document.getElementById("languages-validation");
+  if (languagesValidation) languagesValidation.innerHTML = "";
+
+  if (!skipAlert) {
+    const langInput = wrapper.querySelector('input[data-field="languageName"]');
+    if (langInput) {
+      setTimeout(() => {
+        langInput.focus();
+        langInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 100);
+    }
+  }
+};
+
+window.removeLanguage = function (btn) {
+  btn.closest(".language-item").remove();
+};
+
+window.addAchievement = function (skipAlert = false) {
+  achievementCount++;
+  const wrapper = document.createElement("div");
+  wrapper.className = "achievement-item flex gap-3 items-start";
+  wrapper.innerHTML = `
+    <span class="mt-2 text-gray-400">•</span>
+    <div class="flex-1 form-group">
+      <textarea 
+        data-field="achievementText" 
+        rows="2" 
+        class="w-full px-3 py-2 border border-gray-300 rounded-md text-base
+               resize-none focus:border-black focus:ring-0
+               outline-none transition-colors" 
+        placeholder="e.g. Delivered 200+ hours of leadership training with 95% positive feedback."
+        required
+        data-validation="required|maxLength:500"></textarea>
+      <div class="validation-message"></div>
+    </div>
+    <button type="button" class="mt-1 text-gray-400 hover:text-red-500 transition-colors" onclick="removeAchievement(this)">
+      <i data-lucide="x" class="w-4 h-4"></i>
+    </button>
+  `;
+  achievementsContainer.appendChild(wrapper);
+
+  setupDynamicValidation(wrapper);
+
+  if (window.lucide) lucide.createIcons();
+
+  if (!skipAlert) {
+    const achievementInput = wrapper.querySelector('textarea[data-field="achievementText"]');
+    if (achievementInput) {
+      setTimeout(() => {
+        achievementInput.focus();
+        achievementInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 100);
+    }
+  }
+};
+
+window.removeAchievement = function (btn) {
+  if (confirm("Remove this achievement?")) {
+    btn.closest(".achievement-item").remove();
+  }
+};
 
   // Setup validation for dynamically added fields
   function setupDynamicValidation(container) {
