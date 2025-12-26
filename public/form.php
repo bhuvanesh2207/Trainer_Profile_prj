@@ -19,8 +19,10 @@
             theme: {
                 extend: {
                     colors: {
+                        primary: '#ec1d25',
+                        secondary: '#ffe500',
                         resume: {
-                            primary: '#5D1F2F',
+                            primary: '#ec1d25',
                             accent: '#9d4edd',
                             blue: '#1e40af',
                             slate: '#334155'
@@ -30,11 +32,25 @@
                         sans: ['Inter', 'sans-serif'],
                         serif: ['Merriweather', 'serif'],
                         mono: ['Roboto', 'sans-serif'],
+                    },
+                    animation: {
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'float': 'float 6s ease-in-out infinite',
+                        'gradient': 'gradient 8s ease infinite',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-10px)' },
+                        },
+                        gradient: {
+                            '0%, 100%': { backgroundPosition: '0% 50%' },
+                            '50%': { backgroundPosition: '100% 50%' },
+                        }
                     }
                 }
             }
-        }
-    </script>
+        }   </script>
 
     <style>
         /* Custom Scrollbar */
@@ -55,7 +71,7 @@
         }
 
         /* Print Styles */
-         @media print {
+        @media print {
             @page {
                 size: A4;
                 margin: 0;
@@ -63,8 +79,7 @@
 
             body {
                 background: white;
-                margin: 0;
-                padding: 0;
+
             }
 
             /* Hide everything except the preview modal */
@@ -108,22 +123,17 @@
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
             }
-            
-            /* Set the PDF filename */
-            @page {
-                prince-pdf-title: attr(data-pdf-filename);
-            }
-            
-            body::after {
-                content: attr(data-pdf-filename);
-                display: none;
-            }
         }
 
         /* Validation Styles */
         .input-error {
             border-color: #ef4444 !important;
             background-color: #fef2f2;
+        }
+
+        .input-error:focus {
+            border-color: #000000 !important;
+            box-shadow: 0 0 0 1px #000000 !important;
         }
 
         .input-success {
@@ -152,59 +162,78 @@
         }
     </style>
 </head>
-<body class="bg-gray-100 text-gray-800 font-sans antialiased">
+<body class="font-sans antialiased m-0">
 
-<!-- Top Login Button -->
-<div class="absolute top-4 left-4 z-10">
-    <a href="/trainer_profile/admin/login" class="flex items-center gap-2 px-4 py-2 border rounded-lg shadow-sm hover:bg-gray-50 transition-colors text-sm font-semibold" style="border-color:#5D1F2F; color:#5D1F2F;">
-        <i data-lucide="lock" class="w-4 h-4"></i>
-        Admin Login
-    </a>
-</div>
+<!-- Header -->
+<header class="relative w-full overflow-hidden mb-12 m-0">
 
-<!-- Global Alert Container -->
-<div id="global-alert-container" class="fixed top-4 right-4 z-[100] space-y-2" style="max-width: 400px;">
-    <!-- Alerts will be injected here -->
-</div>
+    <!-- RED STRIP -->
+    <div class="w-full bg-red-700 shadow-2xl">
+        <div class="relative flex items-center justify-center h-20">
 
-<div class="min-h-screen flex flex-col items-center py-12 px-4">
-    
-    <!-- Header -->
-    <div class="text-center mb-10 max-w-xl">
-        <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-2">Trainer Profile Builder</h1>
-        <p class="text-gray-600 text-sm md:text-base">Create your professional profile in minutes.</p>
+            <!-- Centered Title -->
+            <h1 class="text-2xl md:text-5xl font-extrabold tracking-widest text-yellow-300 uppercase">
+                Trainee Profile Builder
+            </h1>
+
+            <!-- Admin Login -->
+            <a
+                href="/trainer_profile/admin/login"
+                class="absolute right-6 flex items-center gap-2 px-5 py-2
+                       rounded-full text-sm font-bold text-black shadow-xl
+                       bg-gradient-to-r from-yellow-400 to-yellow-300
+                       hover:scale-105 hover:shadow-2xl transition-all duration-300"
+            >
+                <i data-lucide="lock" class="w-4 h-4"></i>
+                Admin Login
+            </a>
+
+        </div>
     </div>
 
-    <!-- Multi-Step Form Container -->
+    <!-- YELLOW STRIP -->
+    <div class="w-full bg-yellow-400 py-4 shadow-xl">
+        <p class="text-sm md:text-base font-semibold tracking-wide text-black  text-center">
+            Create Your Professional Trainer Profile In Minutes
+        </p>
+    </div>
+
+</header>
+
+<!-- MAIN CENTER WRAPPER -->
+<div class="w-full flex justify-center px-4 mb-16">
     <div class="w-full max-w-4xl bg-white rounded-xl shadow-xl overflow-hidden flex flex-col min-h-[600px]">
+
         
         <!-- Progress Bar -->
-        <div class="bg-gray-50 p-4 md:p-6 border-b border-gray-100">
+       <div class="bg-[#fee452ff] p-4 md:p-6 border-b border-gray-100">
+
+
             <div class="flex justify-between items-center relative max-w-2xl mx-auto">
                 <!-- Line -->
                 <div class="absolute top-1/2 left-0 w-full h-1 bg-gray-200 -z-0 -translate-y-1/2"></div>
                 <div id="progress-fill" class="absolute top-1/2 left-0 h-1 bg-resume-primary -z-0 -translate-y-1/2 transition-all duration-300 w-0"></div>
 
                 <!-- Steps -->
-                <div class="step-indicator relative z-10 bg-gray-50 px-1 md:px-2 flex flex-col items-center gap-1 active" data-step="1">
+                <div class="step-indicator relative z-10 bg-[#fee452ff] px-1 md:px-2 flex flex-col items-center gap-1 active" data-step="1">
                     <div class="w-7 h-7 md:w-8 md:h-8 rounded-full bg-resume-primary text-white flex items-center justify-center font-bold text-xs md:text-sm">1</div>
-                    <span class="text-[10px] md:text-xs font-medium text-gray-600">Personal</span>
+                    <span class="text-[10px] md:text-xs font-medium text-black">Personal</span>
                 </div>
-                <div class="step-indicator relative z-10 bg-gray-50 px-1 md:px-2 flex flex-col items-center gap-1" data-step="2">
+                <div class="step-indicator relative z-10 bg-[#fee452ff] px-1 md:px-2 flex flex-col items-center gap-1" data-step="2">
                     <div class="w-7 h-7 md:w-8 md:h-8 rounded-full bg-gray-300 text-white flex items-center justify-center font-bold text-xs md:text-sm">2</div>
-                    <span class="text-[10px] md:text-xs font-medium text-gray-400">Experience</span>
+                    <span class="text-[10px] md:text-xs font-medium text-black">Experience</span>
                 </div>
-                <div class="step-indicator relative z-10 bg-gray-50 px-1 md:px-2 flex flex-col items-center gap-1" data-step="3">
+                <div class="step-indicator relative z-10 bg-[#fee452ff] px-1 md:px-2 flex flex-col items-center gap-1" data-step="3">
                     <div class="w-7 h-7 md:w-8 md:h-8 rounded-full bg-gray-300 text-white flex items-center justify-center font-bold text-xs md:text-sm">3</div>
-                    <span class="text-[10px] md:text-xs font-medium text-gray-400">Education</span>
+                    <span class="text-[10px] md:text-xs font-medium text-black">Education</span>
                 </div>
-                <div class="step-indicator relative z-10 bg-gray-50 px-1 md:px-2 flex flex-col items-center gap-1" data-step="4">
+                <div class="step-indicator relative z-10 bg-[#fee452ff] px-1 md:px-2 flex flex-col items-center gap-1" data-step="4">
                     <div class="w-7 h-7 md:w-8 md:h-8 rounded-full bg-gray-300 text-white flex items-center justify-center font-bold text-xs md:text-sm">4</div>
-                    <span class="text-[10px] md:text-xs font-medium text-gray-400">Skills</span>
+                    <span class="text-[10px] md:text-xs font-medium text-black">Skills</span>
                 </div>
-                <div class="step-indicator relative z-10 bg-gray-50 px-1 md:px-2 flex flex-col items-center gap-1" data-step="5">
+                <div class="step-indicator relative z-10 bg-[#fee452ff] px-1 md:px-2 flex flex-col items-center gap-1" data-step="5">
                     <div class="w-7 h-7 md:w-8 md:h-8 rounded-full bg-gray-300 text-white flex items-center justify-center font-bold text-xs md:text-sm">5</div>
-                    <span class="text-[10px] md:text-xs font-medium text-gray-400">Finish</span>
+                    <span class="text-[1px] md:text-xs font-medium text-black">Finish</span>
                 </div>
             </div>
         </div>
@@ -215,40 +244,39 @@
                 
                 <!-- Step 1: Personal Info -->
                 <div class="form-step block" id="step-1">
-                    <h2 class="text-xl font-semibold text-gray-800 mb-4">
+                    <h2 class="text-2xl font-bold text-black mb-4">
                         Personal Information
                     </h2>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                         <div class="form-group">
-                            <label class="block text-xs font-medium text-gray-700 mb-1">
+                            <label class="block text-ls font-medium text-black mb-1">
                                 First Name <span class="text-red-500">*</span>
                             </label>
                             <input
-                                type="text"
-                                name="firstName"
-                                id="firstName"
-                                class="w-full px-2 py-1.5 border border-gray-300 rounded-md text-sm
-                                    focus:ring-2 focus:ring-resume-primary focus:border-transparent
-                                    outline-none transition-colors"
-                                required
-                                data-validation="required"
-                                autofocus
-                            />
+                        type="text"
+                        name="firstName"
+                        id="firstName"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md text-base
+                            focus:border-black focus:ring-0
+                            outline-none transition-colors"
+                        required
+                        data-validation="required"
+                    />
                             <div class="validation-message"></div>
                         </div>
 
                         <div class="form-group">
-                            <label class="block text-xs font-medium text-gray-700 mb-1">
+                            <label class="block text-ls font-medium text-black mb-1">
                                 Last Name <span class="text-red-500">*</span>
                             </label>
                             <input
                                 type="text"
                                 name="lastName"
                                 id="lastName"
-                                class="w-full px-2 py-1.5 border border-gray-300 rounded-md text-sm
-                                    focus:ring-2 focus:ring-resume-primary focus:border-transparent
-                                    outline-none transition-colors"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md text-base
+                            focus:border-black focus:ring-0
+                            outline-none transition-colors"
                                 required
                                 data-validation="required"
                             />
@@ -257,7 +285,7 @@
                     </div>
 
                     <div class="form-group mb-4">
-                        <label class="block text-xs font-medium text-gray-700 mb-1">
+                            <label class="block text-ls font-medium text-black mb-1">
                             Professional Title <span class="text-red-500">*</span>
                         </label>
                         <input
@@ -265,9 +293,9 @@
                             name="title"
                             id="title"
                             placeholder="e.g. Senior Corporate Trainer"
-                            class="w-full px-2 py-1.5 border border-gray-300 rounded-md text-sm
-                                    focus:ring-2 focus:ring-resume-primary focus:border-transparent
-                                    outline-none transition-colors"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md text-base
+                            focus:border-black focus:ring-0
+                            outline-none transition-colors"
                             required
                             data-validation="required"
                         />
@@ -276,7 +304,7 @@
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                         <div class="form-group">
-                            <label class="block text-xs font-medium text-gray-700 mb-1">
+                            <label class="block text-ls font-medium text-black mb-1">
                                 Email <span class="text-red-500">*</span>
                             </label>
                             <input
@@ -284,9 +312,9 @@
                                 name="email"
                                 id="email"
                                 placeholder="your.email@example.com"
-                                class="w-full px-2 py-1.5 border border-gray-300 rounded-md text-sm
-                                    focus:ring-2 focus:ring-resume-primary focus:border-transparent
-                                    outline-none transition-colors"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md text-base
+                            focus:border-black focus:ring-0
+                            outline-none transition-colors"
                                 required
                                 data-validation="required|email"
                             />
@@ -294,7 +322,7 @@
                         </div>
 
                         <div class="form-group">
-                            <label class="block text-xs font-medium text-gray-700 mb-1">
+                            <label class="block text-ls font-medium text-black mb-1">
                                 Phone <span class="text-red-500">*</span>
                             </label>
                             <input
@@ -305,9 +333,9 @@
                                 maxlength="10"
                                 inputmode="numeric"
                                 pattern="[0-9]{10}"
-                                class="w-full px-2 py-1.5 border border-gray-300 rounded-md text-sm
-                                    focus:ring-2 focus:ring-resume-primary focus:border-transparent
-                                    outline-none transition-colors"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md text-base
+                            focus:border-black focus:ring-0
+                            outline-none transition-colors"
                                 required
                                 data-validation="required|phone"
                             />
@@ -316,7 +344,7 @@
                     </div>
 
                     <div class="form-group mb-4">
-                        <label class="block text-xs font-medium text-gray-700 mb-1">
+                            <label class="block text-ls font-medium text-black mb-1">
                             Location
                         </label>
                         <input
@@ -324,16 +352,16 @@
                             name="location"
                             id="location"
                             placeholder="City, State/Country"
-                            class="w-full px-2 py-1.5 border border-gray-300 rounded-md text-sm
-                                    focus:ring-2 focus:ring-resume-primary focus:border-transparent
-                                    outline-none transition-colors"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md text-base
+                            focus:border-black focus:ring-0
+                            outline-none transition-colors"
                             data-validation="maxLength:100"
                         />
                         <div class="validation-message"></div>
                     </div>
 
                     <div class="form-group mb-4">
-                        <label class="block text-xs font-medium text-gray-700 mb-1">
+                            <label class="block text-ls font-medium text-black mb-1">
                             Professional Summary <span class="text-red-500">*</span>
                         </label>
                         <textarea
@@ -341,9 +369,9 @@
                             id="summary"
                             rows="3"
                             placeholder="Briefly describe your experience and expertise..."
-                            class="w-full px-2 py-1.5 border border-gray-300 rounded-md text-sm resize-none
-                                    focus:ring-2 focus:ring-resume-primary focus:border-transparent
-                                    outline-none transition-colors"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md text-base
+                            focus:border-black focus:ring-0
+                            outline-none transition-colors"
                             required
                             data-validation="required"
                         ></textarea>
@@ -354,7 +382,7 @@
                     </div>
 
                     <div class="form-group">
-                        <label class="block text-xs font-medium text-gray-700 mb-1">
+                            <label class="block text-ls font-medium text-black mb-1">
                             Profile Photo <span class="text-red-500">*</span>
                         </label>
                         <input
@@ -441,12 +469,21 @@
         </div>
 
         <!-- Footer Navigation -->
-        <div class="p-4 md:p-6 border-t border-gray-100 bg-gray-50 flex flex-col sm:flex-row justify-between items-center gap-3">
-            <button type="button" id="prev-btn" class="w-full sm:w-auto px-6 py-2 rounded-md bg-gray-200 text-gray-700 font-medium hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed transition-colors" disabled>Previous</button>
-            <button type="button" id="next-btn" class="w-full sm:w-auto px-6 py-2 rounded-md bg-resume-primary text-white font-medium hover:bg-opacity-90 shadow-md flex items-center justify-center gap-2 transition-all">
-                Next Step <i data-lucide="arrow-right" class="w-4 h-4"></i>
-            </button>
-        </div>
+       <div class="p-4 md:p-6 bg-gray-50 flex flex-col sm:flex-row justify-between items-center gap-3">
+        <button type="button" id="prev-btn" 
+            class="w-full sm:w-auto px-6 py-3 rounded-lg border-2 border-transparent text-red-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2 hover:border-red-600" 
+            disabled>
+            <i data-lucide="arrow-left" class="w-4 h-4"></i> Previous
+        </button>
+
+        <button type="button" id="next-btn" 
+            class="w-full sm:w-auto px-6 py-3 rounded-lg border-2 border-transparent text-red-600 flex items-center justify-center gap-2 transition-all hover:border-red-600"> 
+            Next Step <i data-lucide="arrow-right" class="w-4 h-4"></i>
+        </button>
+        </div >
+    </div>
+    </div>
+
     </div>
 </div>
 
@@ -911,11 +948,6 @@ function setupLiveValidation() {
 document.addEventListener('DOMContentLoaded', function() {
     setupLiveValidation();
     setupPrintFunctionality();
-    
-    // Show welcome message
-    setTimeout(() => {
-        showAlert('Welcome! Fill out all required fields to create your professional profile.', 'info', 7000);
-    }, 500);
 });
 </script>
 
@@ -928,6 +960,15 @@ document.addEventListener('DOMContentLoaded', function() {
         lucide.createIcons();
     }
 </script>
+
+<script>
+    window.addEventListener('load', () => {
+        window.scrollTo({ top: 0, behavior: 'instant' });
+    });
+</script>
+
+</body>
+</html>t>
 
 </body>
 </html>
