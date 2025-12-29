@@ -108,17 +108,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </form>
         <div class="text-center mt-4">
             <a href="../form" class="text-black hover:text-[#ec1d25] text-sm font-medium no-underline">
-                Back to Form
+                Back to Form / 
+            </a>
+            <a href="reset_password.php?send_otp=1" class="text-black hover:text-[#ec1d25] text-sm font-medium no-underline">
+                Reset password
             </a>
         </div>
     </div>
 
-    <!-- Lucide icons replacement -->
-   <script>
-    document.addEventListener("DOMContentLoaded", function() {
-        lucide.replace();
-    });
-
+    <script>
     document.addEventListener("DOMContentLoaded", function() {
     // Focus the username input automatically
     const usernameInput = document.getElementById('username');

@@ -169,23 +169,29 @@
 
     <!-- RED STRIP -->
     <div class="w-full bg-red-700 shadow-2xl">
-        <div class="relative flex items-center justify-center h-20">
+        <div class="relative flex items-center justify-center h-20 pr-14 md:pr-24">
 
             <!-- Centered Title -->
-            <h1 class="text-2xl md:text-5xl font-extrabold tracking-widest text-yellow-300 uppercase">
+            <h1 class="pl-6 md:pl-0 text-2xl md:text-5xl font-extrabold tracking-widest text-yellow-300 uppercase">
                 Trainee Profile Builder
             </h1>
 
-            <!-- Admin Login -->
+
+            <!-- ✅ FIXED ADMIN LOGIN -->
             <a
                 href="/trainer_profile/admin/login"
-                class="absolute right-6 flex items-center gap-2 px-5 py-2
-                       rounded-full text-sm font-bold text-black shadow-xl
+                class="absolute right-3 md:right-6 flex items-center gap-2
+                       px-3 md:px-5 py-2 rounded-full
+                       text-sm font-bold text-black shadow-xl
                        bg-gradient-to-r from-yellow-400 to-yellow-300
                        hover:scale-105 hover:shadow-2xl transition-all duration-300"
+                title="Admin Login"
             >
-                <i data-lucide="lock" class="w-4 h-4"></i>
-                Admin Login
+                <!-- Person icon (always visible) -->
+                <i data-lucide="user" class="w-5 h-5"></i>
+
+                <!-- Text hidden on mobile -->
+                <span class="hidden md:inline">Admin Login</span>
             </a>
 
         </div>
@@ -193,12 +199,13 @@
 
     <!-- YELLOW STRIP -->
     <div class="w-full bg-yellow-400 py-4 shadow-xl">
-        <p class="text-sm md:text-base font-semibold tracking-wide text-black  text-center">
+        <p class="text-sm md:text-base font-semibold tracking-wide text-black text-center">
             Create Your Professional Trainer Profile In Minutes
         </p>
     </div>
 
 </header>
+
 
 <!-- MAIN CENTER WRAPPER -->
 <div class="w-full flex justify-center px-4 mb-16">
